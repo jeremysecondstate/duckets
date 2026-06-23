@@ -73,6 +73,7 @@ def sync_hyperliquid_portfolio(
                 amount=perp_cash_value,
                 value=perp_cash_value,
                 source="hyperliquid",
+                bucket="Perps",
             )
         )
 
@@ -109,12 +110,12 @@ def _perp_holdings(clearinghouse_state: dict[str, Any]) -> list[Holding]:
 
         holdings.append(
             Holding(
-                symbol=f"{coin}-{side_suffix}",
+                symbol=f"{coin}-PERP" if signed_size > 0 else f"{coin}-PERP-SHORT",
                 quantity=round(quantity, 8),
                 price=round(price, 8),
                 value=round(value, 2),
                 source="hyperliquid",
-                asset_type="perp",
+                bucket="Perps",
             )
         )
 
@@ -145,6 +146,7 @@ def _spot_balances(
                     amount=round(quantity, 8),
                     value=round(value, 2),
                     source="hyperliquid",
+                    bucket="Spot",
                 )
             )
             continue
@@ -158,7 +160,7 @@ def _spot_balances(
                 price=round(price, 8),
                 value=round(value, 2),
                 source="hyperliquid",
-                asset_type="spot",
+                bucket="Spot",
             )
         )
 

@@ -25,13 +25,13 @@ def main() -> None:
         print()
         print("Cash")
         for cash in snapshot.cash:
-            print(f"- {cash.symbol}: {cash.amount:g} = ${cash.value:,.2f}")
+            print(f"- {cash.bucket} {cash.symbol}: {cash.amount:g} = ${cash.value:,.2f}")
 
         print()
         print("Holdings")
         for holding in snapshot.holdings:
             print(
-                f"- {holding.symbol}: "
+                f"- {holding.bucket} {holding.symbol}: "
                 f"{holding.quantity:g} @ ${holding.price:,.4f} = ${holding.value:,.2f}"
             )
 

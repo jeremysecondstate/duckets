@@ -15,7 +15,7 @@ class Holding:
     price: float
     value: float
     source: Source
-    asset_type: str = "unknown"
+    bucket: str
 
 
 @dataclass(frozen=True)
@@ -24,6 +24,7 @@ class CashBalance:
     amount: float
     value: float
     source: Source
+    bucket: str
 
 
 @dataclass(frozen=True)
