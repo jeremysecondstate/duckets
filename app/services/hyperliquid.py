@@ -36,6 +36,7 @@ def sync_hyperliquid_portfolio() -> PortfolioSnapshot:
     clearinghouse_state = client.post_info({"type": "clearinghouseState", "user": wallet_address})
     spot_state = client.post_info({"type": "spotClearinghouseState", "user": wallet_address})
     all_mids = client.post_info({"type": "allMids"})
+    spot_meta_and_asset_ctxs = client.post_info({"type": "spotMetaAndAssetCtxs"})
 
     if not isinstance(clearinghouse_state, dict):
         raise RuntimeError("Hyperliquid clearinghouseState returned an unexpected response.")
@@ -45,7 +46,9 @@ def sync_hyperliquid_portfolio() -> PortfolioSnapshot:
         raise RuntimeError("Hyperliquid allMids returned an unexpected response.")
 
     perp_holdings = _perp_holdings(clearinghouse_state)
-    spot_cash, spot_holdings = _spot_balances(spot_state, all_mids)
+    spot_cash, spot_holdings = _spot_balances(spot_state, all_mids, spot_meta_and_asset_ctxs)
+    if not isinstance(spot_meta_and_asset_ctxs, list):
+        raise RuntimeError("Hyperliquid spotMetaAndAssetCtxs returned an unexpected response.")
 
     perp_account_value = _perp_account_value(clearinghouse_state)
     perp_notional = round(sum(holding.value for holding in perp_holdings), 2)
@@ -109,6 +112,7 @@ def _perp_holdings(clearinghouse_state: dict[str, Any]) -> list[Holding]:
 def _spot_balances(
     spot_state: dict[str, Any],
     all_mids: dict[str, Any],
+    spot_meta_and_asset_ctxs: list[Any],
 ) -> tuple[list[CashBalance], list[Holding]]:
     cash: list[CashBalance] = []
     holdings: list[Holding] = []
@@ -120,7 +124,7 @@ def _spot_balances(
         if not symbol or quantity <= ZERO_EPSILON:
             continue
 
-        value = _spot_value(symbol, quantity, balance, all_mids)
+        value = _spot_value(symbol, quantity, balance, all_mids, spot_meta_and_asset_ctxs)
 
         if symbol in CASH_SYMBOLS:
             cash.append(
@@ -154,6 +158,7 @@ def _spot_value(
     quantity: float,
     balance: dict[str, Any],
     all_mids: dict[str, Any],
+    spot_meta_and_asset_ctxs: list[Any],
 ) -> float:
     direct_value = _first_number(balance, ("usdValue", "usdcValue", "currentValue", "marketValue", "value"))
     if direct_value is not None:
@@ -162,11 +167,103 @@ def _spot_value(
     if symbol in CASH_SYMBOLS:
         return quantity
 
-    mid_price = _to_float(all_mids.get(symbol))
-    if mid_price is None:
-        raise RuntimeError(f"Could not price Hyperliquid spot balance: {symbol}")
+    price = _spot_price(symbol, balance, all_mids, spot_meta_and_asset_ctxs)
+    if price is None:
+        available_keys = ", ".join(sorted(str(key) for key in all_mids.keys())[:20])
+        raise RuntimeError(
+            f"Could not price Hyperliquid spot balance: {symbol}. "
+            f"First allMids keys: {available_keys}"
+        )
 
-    return quantity * mid_price
+    return quantity * price
+
+
+def _spot_price(
+    symbol: str,
+    balance: dict[str, Any],
+    all_mids: dict[str, Any],
+    spot_meta_and_asset_ctxs: list[Any],
+) -> float | None:
+    direct_price = _to_float(all_mids.get(symbol))
+    if direct_price is not None:
+        return direct_price
+
+    token_index = _spot_token_index(balance)
+    candidate_keys = _spot_mid_keys(symbol, token_index, spot_meta_and_asset_ctxs)
+
+    for key in candidate_keys:
+        price = _to_float(all_mids.get(key))
+        if price is not None:
+            return price
+
+    return None
+
+
+def _spot_token_index(balance: dict[str, Any]) -> int | None:
+    value = balance.get("token")
+    if isinstance(value, int):
+        return value
+
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+
+    value = balance.get("tokenIndex")
+    if isinstance(value, int):
+        return value
+
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+
+    return None
+
+
+def _spot_mid_keys(
+    symbol: str,
+    token_index: int | None,
+    spot_meta_and_asset_ctxs: list[Any],
+) -> list[str]:
+    keys = [symbol]
+
+    if token_index is not None:
+        keys.append(f"@{token_index}")
+
+    universe = _spot_universe(spot_meta_and_asset_ctxs)
+    for index, asset in enumerate(universe):
+        if not isinstance(asset, dict):
+            continue
+
+        name = str(asset.get("name") or asset.get("coin") or "").strip().upper()
+        tokens = asset.get("tokens")
+
+        if name == symbol:
+            keys.extend([str(asset.get("name")), f"@{index}"])
+
+        if isinstance(tokens, list) and token_index is not None and token_index in tokens:
+            keys.extend([str(asset.get("name")), f"@{index}"])
+
+    return _dedupe_strings([key for key in keys if key])
+
+
+def _spot_universe(spot_meta_and_asset_ctxs: list[Any]) -> list[Any]:
+    if not spot_meta_and_asset_ctxs:
+        return []
+
+    meta = spot_meta_and_asset_ctxs[0]
+    if not isinstance(meta, dict):
+        return []
+
+    universe = meta.get("universe")
+    return universe if isinstance(universe, list) else []
+
+
+def _dedupe_strings(values: list[str]) -> list[str]:
+    result: list[str] = []
+
+    for value in values:
+        if value not in result:
+            result.append(value)
+
+    return result
 
 
 def _perp_account_value(clearinghouse_state: dict[str, Any]) -> float:
