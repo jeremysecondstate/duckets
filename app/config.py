@@ -12,7 +12,7 @@ load_dotenv()
 
 
 def hyperliquid_wallet_address() -> str:
-    return _required_env("HYPE_WALLET_ADDRESS_JEREMY")
+    return _required_env("HYPE_WALLET_ADDRESS_JEREMY_SECONDSTATE")
 
 
 def hyperliquid_info_url() -> str:
