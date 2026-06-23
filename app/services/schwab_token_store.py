@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Any
 
 
-TOKEN_CACHE_PATH = Path("data") / "schwab_tokens.json"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+TOKEN_CACHE_PATH = PROJECT_ROOT / "data" / "schwab_tokens.json"
 ACCESS_TOKEN_EXPIRY_SAFETY_SECONDS = 60
 
 
