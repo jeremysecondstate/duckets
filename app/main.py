@@ -1,9 +1,8 @@
 from __future__ import annotations
-
-from app.models.portfolio import PortfolioSnapshot
+from app.services.aggregate import DucketBucketSnapshot
 from app.services.hyperliquid import sync_hyperliquid_portfolios
-import sys
 from app.services.schwab import SchwabSession, sync_schwab_portfolio
+import sys
 
 
 def main() -> None:
@@ -18,15 +17,17 @@ def main() -> None:
         print("Schwab authorization saved.")
         return
 
-    snapshots = [sync_schwab_portfolio(), *sync_hyperliquid_portfolios()]
+    bucket = DucketBucketSnapshot(
+        snapshots=[sync_schwab_portfolio(), *sync_hyperliquid_portfolios()]
+    )
 
     print("DUCKET BUCKET")
     print("=============")
-    print(f"Cash: ${_cash_value(snapshots):,.2f}")
-    print(f"Holdings: ${_holdings_value(snapshots):,.2f}")
-    print(f"Total: ${_total_value(snapshots):,.2f}")
+    print(f"Cash: ${bucket.cash_value:,.2f}")
+    print(f"Holdings: ${bucket.holdings_value:,.2f}")
+    print(f"Total: ${bucket.total_value:,.2f}")
 
-    for snapshot in snapshots:
+    for snapshot in bucket.snapshots:
         print()
         print(snapshot.account_label.upper())
         print("-" * len(snapshot.account_label))
@@ -47,18 +48,6 @@ def main() -> None:
                 f"- {holding.bucket} {holding.symbol}: "
                 f"{holding.quantity:g} @ ${holding.price:,.4f} = ${holding.value:,.2f}"
             )
-
-
-def _cash_value(snapshots: list[PortfolioSnapshot]) -> float:
-    return round(sum(snapshot.cash_value for snapshot in snapshots), 2)
-
-
-def _holdings_value(snapshots: list[PortfolioSnapshot]) -> float:
-    return round(sum(snapshot.holdings_value for snapshot in snapshots), 2)
-
-
-def _total_value(snapshots: list[PortfolioSnapshot]) -> float:
-    return round(sum(snapshot.total_value for snapshot in snapshots), 2)
 
 
 if __name__ == "__main__":
