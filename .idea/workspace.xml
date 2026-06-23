@@ -4,13 +4,23 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Initial project structure">
-      <change beforePath="$PROJECT_DIR$/app/services/hyperliquid.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/hyperliquid.py" afterDir="false" />
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="added and labeled spot and perp balances!">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/schwab.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/schwab.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -30,6 +40,65 @@
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0106160792208114" />
+      <entry key="MS500" value="1.671275014449028" />
+      <entry key="S2" value="4.598189712391358" />
+      <entry key="S5" value="7.609228650585915" />
+      <entry key="S10" value="9.425012923262058" />
+      <entry key="S30" value="11.036146970405383" />
+      <entry key="S60" value="11.506879779844116" />
+      <entry key="M2" value="11.938249027723664" />
+      <entry key="M5" value="13.948920216303478" />
+      <entry key="M10" value="16.478483990285753" />
+      <entry key="M15" value="17.884640849200448" />
+      <entry key="M30" value="20.103767399587735" />
+      <entry key="H1" value="22.748177345447495" />
+      <entry key="H2" value="25.5927244569057" />
+      <entry key="H4" value="27.84751750439003" />
+      <entry key="D1" value="30.396932681607833" />
+      <entry key="W1" value="30.911706827855202" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.9692435757259895" />
+      <entry key="MS500" value="1.6555923046397278" />
+      <entry key="S2" value="4.584733609471573" />
+      <entry key="S5" value="7.599622874737877" />
+      <entry key="S10" value="9.41890968409511" />
+      <entry key="S30" value="11.03372393067248" />
+      <entry key="S60" value="11.505606028182966" />
+      <entry key="M2" value="11.937456590579021" />
+      <entry key="M5" value="13.948047314564404" />
+      <entry key="M10" value="16.477681555576243" />
+      <entry key="M15" value="17.883970014296022" />
+      <entry key="M30" value="20.103328195455084" />
+      <entry key="H1" value="22.747900718851042" />
+      <entry key="H2" value="25.59255679452546" />
+      <entry key="H4" value="27.847422227864715" />
+      <entry key="D1" value="30.396914662062663" />
+      <entry key="W1" value="30.91170419211079" />
+    </decayedShown>
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
   "associatedIndex": 1,
@@ -81,7 +150,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1782170828027</updated>
-      <workItem from="1782170829083" duration="6172000" />
+      <workItem from="1782170829083" duration="8562000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -99,7 +168,31 @@
       <option name="project" value="LOCAL" />
       <updated>1782184583977</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="api key change and hyperliquid updates!">
+      <option name="closed" value="true" />
+      <created>1782186425033</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1782186425033</updated>
+    </task>
+    <task id="LOCAL-00004" summary="added Alex to accounts in hyperliquid!">
+      <option name="closed" value="true" />
+      <created>1782193565192</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1782193565192</updated>
+    </task>
+    <task id="LOCAL-00005" summary="added and labeled spot and perp balances!">
+      <option name="closed" value="true" />
+      <created>1782194246668</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1782194246668</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -107,9 +200,12 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial project structure" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial project structure" />
+    <MESSAGE value="api key change and hyperliquid updates!" />
+    <MESSAGE value="added Alex to accounts in hyperliquid!" />
+    <MESSAGE value="added and labeled spot and perp balances!" />
+    <option name="LAST_COMMIT_MESSAGE" value="added and labeled spot and perp balances!" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782186348440" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782194904120" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
   </component>
 </project>

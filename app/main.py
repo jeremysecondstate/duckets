@@ -2,9 +2,22 @@ from __future__ import annotations
 
 from app.models.portfolio import PortfolioSnapshot
 from app.services.hyperliquid import sync_hyperliquid_portfolios
+import sys
+from app.services.schwab import SchwabSession
 
 
 def main() -> None:
+
+    if len(sys.argv) > 1 and sys.argv[1] == "schwab-auth":
+        session = SchwabSession()
+        authorization_url, _state = session.build_authorization_url()
+        print("Open this URL, log in, approve access, then copy the code from the redirect URL:")
+        print(authorization_url)
+        code = input("Schwab authorization code: ").strip()
+        session.exchange_authorization_code(code)
+        print("Schwab authorization saved.")
+        return
+
     snapshots = sync_hyperliquid_portfolios()
 
     print("DUCKET BUCKET")

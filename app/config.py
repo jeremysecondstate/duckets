@@ -40,3 +40,18 @@ def _required_env(name: str) -> str:
     if not value:
         raise RuntimeError(f"Missing required environment variable: {name}")
     return value
+
+
+@dataclass(frozen=True)
+class SchwabConfig:
+    client_id: str
+    client_secret: str
+    redirect_uri: str
+
+
+def schwab_config() -> SchwabConfig:
+    return SchwabConfig(
+        client_id=_required_env("SCHWAB_CLIENT_ID"),
+        client_secret=_required_env("SCHWAB_CLIENT_SECRET"),
+        redirect_uri=_required_env("SCHWAB_REDIRECT_URI"),
+    )
