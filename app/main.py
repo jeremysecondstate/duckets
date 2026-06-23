@@ -3,7 +3,7 @@ from __future__ import annotations
 from app.models.portfolio import PortfolioSnapshot
 from app.services.hyperliquid import sync_hyperliquid_portfolios
 import sys
-from app.services.schwab import SchwabSession
+from app.services.schwab import SchwabSession, sync_schwab_portfolio
 
 
 def main() -> None:
@@ -18,7 +18,7 @@ def main() -> None:
         print("Schwab authorization saved.")
         return
 
-    snapshots = sync_hyperliquid_portfolios()
+    snapshots = [sync_schwab_portfolio(), *sync_hyperliquid_portfolios()]
 
     print("DUCKET BUCKET")
     print("=============")
