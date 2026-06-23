@@ -5,7 +5,7 @@ from typing import Any
 
 import requests
 
-from app.config import hyperliquid_info_url, hyperliquid_wallet_address
+from app.config import HyperliquidAccountConfig, hyperliquid_accounts, hyperliquid_info_url
 from app.models.portfolio import CashBalance, Holding, PortfolioSnapshot
 
 
@@ -29,9 +29,20 @@ class HyperliquidInfoClient:
         return response.json()
 
 
-def sync_hyperliquid_portfolio() -> PortfolioSnapshot:
-    wallet_address = _normalize_wallet_address(hyperliquid_wallet_address())
+def sync_hyperliquid_portfolios() -> list[PortfolioSnapshot]:
     client = HyperliquidInfoClient()
+    return [
+        sync_hyperliquid_portfolio(account, client)
+        for account in hyperliquid_accounts()
+    ]
+
+
+def sync_hyperliquid_portfolio(
+    account: HyperliquidAccountConfig,
+    client: HyperliquidInfoClient | None = None,
+) -> PortfolioSnapshot:
+    wallet_address = _normalize_wallet_address(account.wallet_address)
+    client = client or HyperliquidInfoClient()
 
     clearinghouse_state = client.post_info({"type": "clearinghouseState", "user": wallet_address})
     spot_state = client.post_info({"type": "spotClearinghouseState", "user": wallet_address})
@@ -44,11 +55,11 @@ def sync_hyperliquid_portfolio() -> PortfolioSnapshot:
         raise RuntimeError("Hyperliquid spotClearinghouseState returned an unexpected response.")
     if not isinstance(all_mids, dict):
         raise RuntimeError("Hyperliquid allMids returned an unexpected response.")
+    if not isinstance(spot_meta_and_asset_ctxs, list):
+        raise RuntimeError("Hyperliquid spotMetaAndAssetCtxs returned an unexpected response.")
 
     perp_holdings = _perp_holdings(clearinghouse_state)
     spot_cash, spot_holdings = _spot_balances(spot_state, all_mids, spot_meta_and_asset_ctxs)
-    if not isinstance(spot_meta_and_asset_ctxs, list):
-        raise RuntimeError("Hyperliquid spotMetaAndAssetCtxs returned an unexpected response.")
 
     perp_account_value = _perp_account_value(clearinghouse_state)
     perp_notional = round(sum(holding.value for holding in perp_holdings), 2)
@@ -67,10 +78,11 @@ def sync_hyperliquid_portfolio() -> PortfolioSnapshot:
 
     return PortfolioSnapshot(
         source="hyperliquid",
+        account_label=account.label,
         cash=cash,
         holdings=[*perp_holdings, *spot_holdings],
         synced_at=datetime.now(),
-        status=f"synced {wallet_address[:6]}...{wallet_address[-4:]}",
+        status=f"{account.label} synced {wallet_address[:6]}...{wallet_address[-4:]}",
     )
 
 

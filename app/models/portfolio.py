@@ -29,6 +29,7 @@ class CashBalance:
 @dataclass(frozen=True)
 class PortfolioSnapshot:
     source: Source
+    account_label: str
     cash: list[CashBalance] = field(default_factory=list)
     holdings: list[Holding] = field(default_factory=list)
     synced_at: datetime | None = None
