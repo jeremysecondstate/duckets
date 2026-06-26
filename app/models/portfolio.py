@@ -59,3 +59,7 @@ class PortfolioSnapshot:
     def day_pnl(self) -> float | None:
         values = [holding.day_pnl for holding in self.holdings if holding.day_pnl is not None]
         return round(sum(values), 2) if values else None
+
+    @property
+    def has_day_pnl(self) -> bool:
+        return self.day_pnl is not None

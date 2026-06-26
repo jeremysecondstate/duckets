@@ -39,7 +39,7 @@ def main() -> None:
         print(f"Holdings: ${snapshot.holdings_value:,.2f}")
         print(f"Total: ${snapshot.total_value:,.2f}")
         print(f"Unrealized PnL: {_money_or_dash(snapshot.unrealized_pnl)}")
-        print(f"Day PnL: {_money_or_dash(snapshot.day_pnl)}")
+        print(f"Day PnL: {_money_or_dash(bucket.day_pnl)} ({_coverage_or_dash(bucket.day_pnl_accounts)})")
 
         print()
         print("Cash")
@@ -59,6 +59,10 @@ def main() -> None:
 
 def _money_or_dash(value: float | None) -> str:
     return "--" if value is None else f"${value:,.2f}"
+
+
+def _coverage_or_dash(labels: list[str]) -> str:
+    return " + ".join(labels) if labels else "no account day PnL available"
 
 
 if __name__ == "__main__":

@@ -30,3 +30,11 @@ class DucketBucketSnapshot:
     def day_pnl(self) -> float | None:
         values = [snapshot.day_pnl for snapshot in self.snapshots if snapshot.day_pnl is not None]
         return round(sum(values), 2) if values else None
+
+    @property
+    def day_pnl_accounts(self) -> list[str]:
+        return [
+            snapshot.account_label
+            for snapshot in self.snapshots
+            if snapshot.day_pnl is not None
+        ]

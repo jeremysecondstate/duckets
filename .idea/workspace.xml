@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="latest changes">
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="changes to main.py!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/aggregate.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/aggregate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/hyperliquid.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/hyperliquid.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/schwab.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/schwab.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,23 +40,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.1092948610387239" />
-      <entry key="MS500" value="2.752450554356197" />
-      <entry key="S2" value="6.675938819007881" />
-      <entry key="S5" value="10.374323815690484" />
-      <entry key="S10" value="12.664856100724007" />
-      <entry key="S30" value="14.740066561437363" />
-      <entry key="S60" value="15.35256786977163" />
-      <entry key="M2" value="15.858374184691575" />
-      <entry key="M5" value="17.912239524376638" />
-      <entry key="M10" value="20.457189438540855" />
-      <entry key="M15" value="21.869350605029926" />
-      <entry key="M30" value="24.095259624163905" />
-      <entry key="H1" value="26.743409875658003" />
-      <entry key="H2" value="29.590064585972275" />
-      <entry key="H4" value="31.846078136772284" />
-      <entry key="D1" value="34.396672165936266" />
-      <entry key="W1" value="34.91166901651402" />
+      <entry key="MS100" value="1.0001641170358448" />
+      <entry key="MS500" value="1.3808030515906198" />
+      <entry key="S2" value="3.1572763656343015" />
+      <entry key="S5" value="4.116761292702458" />
+      <entry key="S10" value="4.529702933085334" />
+      <entry key="S30" value="5.111493008468916" />
+      <entry key="S60" value="6.4009880602120015" />
+      <entry key="M2" value="8.403541076336413" />
+      <entry key="M5" value="10.695892160326174" />
+      <entry key="M10" value="11.926834102068808" />
+      <entry key="M15" value="13.061755829604653" />
+      <entry key="M30" value="17.495248858488534" />
+      <entry key="H1" value="24.88009330586889" />
+      <entry key="H2" value="32.79378142329908" />
+      <entry key="H4" value="39.063809357068195" />
+      <entry key="D1" value="46.2695390605605" />
+      <entry key="W1" value="47.745955178142644" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -82,23 +78,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0535090850703042" />
-      <entry key="MS500" value="2.64308429751871" />
-      <entry key="S2" value="6.606175597395045" />
-      <entry key="S5" value="10.337327388350548" />
-      <entry key="S10" value="12.643990291990633" />
-      <entry key="S30" value="14.732441756617131" />
-      <entry key="S60" value="15.348654525128948" />
-      <entry key="M2" value="15.856252737354875" />
-      <entry key="M5" value="17.910833656820607" />
-      <entry key="M10" value="20.456120180285644" />
-      <entry key="M15" value="21.868501728114712" />
-      <entry key="M30" value="24.094731280352033" />
-      <entry key="H1" value="26.74308864047033" />
-      <entry key="H2" value="29.589874606921633" />
-      <entry key="H4" value="31.84597169794917" />
-      <entry key="D1" value="34.39665228532079" />
-      <entry key="W1" value="34.91166611488311" />
+      <entry key="MS100" value="0.03435104333297317" />
+      <entry key="MS500" value="0.8850880046715595" />
+      <entry key="S2" value="2.994932067273626" />
+      <entry key="S5" value="4.047386755785343" />
+      <entry key="S10" value="4.494189591622527" />
+      <entry key="S30" value="5.099370883001721" />
+      <entry key="S60" value="6.394701491406148" />
+      <entry key="M2" value="8.400228691479613" />
+      <entry key="M5" value="10.694490345116504" />
+      <entry key="M10" value="11.926106406164218" />
+      <entry key="M15" value="13.061236836468025" />
+      <entry key="M30" value="17.494896641185438" />
+      <entry key="H1" value="24.879825321077195" />
+      <entry key="H2" value="32.79359216229427" />
+      <entry key="H4" value="39.063691288639184" />
+      <entry key="D1" value="46.26951469263243" />
+      <entry key="W1" value="47.745951556706146" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -159,7 +155,7 @@
       <option name="presentableId" value="Default" />
       <updated>1782170828027</updated>
       <workItem from="1782170829083" duration="14954000" />
-      <workItem from="1782368167448" duration="5765000" />
+      <workItem from="1782368167448" duration="7837000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -241,7 +237,23 @@
       <option name="project" value="LOCAL" />
       <updated>1782451665904</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="finishing up the PnL additions!!">
+      <option name="closed" value="true" />
+      <created>1782455638556</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1782455638556</updated>
+    </task>
+    <task id="LOCAL-00012" summary="changes to main.py!">
+      <option name="closed" value="true" />
+      <created>1782455781471</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1782455781471</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -256,9 +268,11 @@
     <MESSAGE value="Add Schwab portfolio sync" />
     <MESSAGE value="Use DucketBucketSnapshot for combined totals" />
     <MESSAGE value="latest changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="latest changes" />
+    <MESSAGE value="finishing up the PnL additions!!" />
+    <MESSAGE value="changes to main.py!" />
+    <option name="LAST_COMMIT_MESSAGE" value="changes to main.py!" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782197073503" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782456915502" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
   </component>
 </project>
