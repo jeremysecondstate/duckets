@@ -253,6 +253,8 @@ def _holding_from_schwab(row: dict[str, Any]) -> Holding | None:
         value=round(market_value, 2),
         source="schwab",
         bucket="Equity",
+        unrealized_pnl=_schwab_unrealized_pnl(row),
+        day_pnl=_schwab_day_pnl(row),
     )
 
 
@@ -269,6 +271,32 @@ def _net_quantity(row: dict[str, Any]) -> float:
             return value
 
     return 0.0
+
+
+def _schwab_unrealized_pnl(row: dict[str, Any]) -> float | None:
+    long_pnl = _to_float(row.get("longOpenProfitLoss"))
+    short_pnl = _to_float(row.get("shortOpenProfitLoss"))
+
+    if long_pnl is not None or short_pnl is not None:
+        return round((long_pnl or 0.0) + (short_pnl or 0.0), 2)
+
+    value = _first_number(row, ("openProfitLoss", "unrealizedProfitLoss", "unrealizedPnl"))
+    return round(value, 2) if value is not None else None
+
+
+def _schwab_day_pnl(row: dict[str, Any]) -> float | None:
+    value = _first_number(row, ("currentDayProfitLoss", "dayProfitLoss"))
+
+    if value is not None:
+        return round(value, 2)
+
+    market_value = _to_float(row.get("marketValue"))
+    day_pnl_percent = _first_number(row, ("currentDayProfitLossPercentage", "dayProfitLossPercentage"))
+
+    if market_value is None or day_pnl_percent is None:
+        return None
+
+    return round(market_value * (day_pnl_percent / 100.0), 2)
 
 
 def _first_number(row: dict[str, Any], keys: tuple[str, ...]) -> float | None:

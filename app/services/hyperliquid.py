@@ -116,6 +116,8 @@ def _perp_holdings(clearinghouse_state: dict[str, Any]) -> list[Holding]:
                 value=round(value, 2),
                 source="hyperliquid",
                 bucket="Perps",
+                unrealized_pnl=_to_float(position.get("unrealizedPnl")),
+                day_pnl=None,
             )
         )
 

@@ -20,3 +20,13 @@ class DucketBucketSnapshot:
     @property
     def total_value(self) -> float:
         return round(sum(snapshot.total_value for snapshot in self.snapshots), 2)
+
+    @property
+    def unrealized_pnl(self) -> float | None:
+        values = [snapshot.unrealized_pnl for snapshot in self.snapshots if snapshot.unrealized_pnl is not None]
+        return round(sum(values), 2) if values else None
+
+    @property
+    def day_pnl(self) -> float | None:
+        values = [snapshot.day_pnl for snapshot in self.snapshots if snapshot.day_pnl is not None]
+        return round(sum(values), 2) if values else None

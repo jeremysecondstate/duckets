@@ -36,18 +36,28 @@ def main() -> None:
         print(f"Holdings: ${snapshot.holdings_value:,.2f}")
         print(f"Total: ${snapshot.total_value:,.2f}")
 
+        print(f"Unrealized PnL: {_money_or_dash(bucket.unrealized_pnl)}")
+        print(f"Day PnL: {_money_or_dash(bucket.day_pnl)}")
+
         print()
         print("Cash")
         for cash in snapshot.cash:
             print(f"- {cash.bucket} {cash.symbol}: {cash.amount:g} = ${cash.value:,.2f}")
+            print(f"Unrealized PnL: {_money_or_dash(snapshot.unrealized_pnl)}")
+            print(f"Day PnL: {_money_or_dash(snapshot.day_pnl)}")
 
         print()
         print("Holdings")
         for holding in snapshot.holdings:
             print(
                 f"- {holding.bucket} {holding.symbol}: "
-                f"{holding.quantity:g} @ ${holding.price:,.4f} = ${holding.value:,.2f}"
+                f"{holding.quantity:g} @ ${holding.price:,.4f} = ${holding.value:,.2f}, "
+                f"uPnL {_money_or_dash(holding.unrealized_pnl)}, "
+                f"day {_money_or_dash(holding.day_pnl)}"
             )
+
+def _money_or_dash(value: float | None) -> str:
+    return "--" if value is None else f"${value:,.2f}"
 
 
 if __name__ == "__main__":
