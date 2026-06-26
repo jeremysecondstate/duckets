@@ -16,6 +16,8 @@ class Holding:
     value: float
     source: Source
     bucket: str
+    unrealized_pnl: float | None = None
+    day_pnl: float | None = None
 
 
 @dataclass(frozen=True)
@@ -47,3 +49,13 @@ class PortfolioSnapshot:
     @property
     def total_value(self) -> float:
         return round(self.cash_value + self.holdings_value, 2)
+
+    @property
+    def unrealized_pnl(self) -> float | None:
+        values = [holding.unrealized_pnl for holding in self.holdings if holding.unrealized_pnl is not None]
+        return round(sum(values), 2) if values else None
+
+    @property
+    def day_pnl(self) -> float | None:
+        values = [holding.day_pnl for holding in self.holdings if holding.day_pnl is not None]
+        return round(sum(values), 2) if values else None
