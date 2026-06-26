@@ -1,12 +1,13 @@
 from __future__ import annotations
+
+import sys
+
 from app.services.aggregate import DucketBucketSnapshot
 from app.services.hyperliquid import sync_hyperliquid_portfolios
 from app.services.schwab import SchwabSession, sync_schwab_portfolio
-import sys
 
 
 def main() -> None:
-
     if len(sys.argv) > 1 and sys.argv[1] == "schwab-auth":
         session = SchwabSession()
         authorization_url, _state = session.build_authorization_url()
@@ -26,6 +27,8 @@ def main() -> None:
     print(f"Cash: ${bucket.cash_value:,.2f}")
     print(f"Holdings: ${bucket.holdings_value:,.2f}")
     print(f"Total: ${bucket.total_value:,.2f}")
+    print(f"Unrealized PnL: {_money_or_dash(bucket.unrealized_pnl)}")
+    print(f"Day PnL: {_money_or_dash(bucket.day_pnl)}")
 
     for snapshot in bucket.snapshots:
         print()
@@ -35,16 +38,13 @@ def main() -> None:
         print(f"Cash: ${snapshot.cash_value:,.2f}")
         print(f"Holdings: ${snapshot.holdings_value:,.2f}")
         print(f"Total: ${snapshot.total_value:,.2f}")
-
-        print(f"Unrealized PnL: {_money_or_dash(bucket.unrealized_pnl)}")
-        print(f"Day PnL: {_money_or_dash(bucket.day_pnl)}")
+        print(f"Unrealized PnL: {_money_or_dash(snapshot.unrealized_pnl)}")
+        print(f"Day PnL: {_money_or_dash(snapshot.day_pnl)}")
 
         print()
         print("Cash")
         for cash in snapshot.cash:
             print(f"- {cash.bucket} {cash.symbol}: {cash.amount:g} = ${cash.value:,.2f}")
-            print(f"Unrealized PnL: {_money_or_dash(snapshot.unrealized_pnl)}")
-            print(f"Day PnL: {_money_or_dash(snapshot.day_pnl)}")
 
         print()
         print("Holdings")
@@ -55,6 +55,7 @@ def main() -> None:
                 f"uPnL {_money_or_dash(holding.unrealized_pnl)}, "
                 f"day {_money_or_dash(holding.day_pnl)}"
             )
+
 
 def _money_or_dash(value: float | None) -> str:
     return "--" if value is None else f"${value:,.2f}"
