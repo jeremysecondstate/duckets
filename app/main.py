@@ -5,6 +5,7 @@ import sys
 from app.services.aggregate import DucketBucketSnapshot
 from app.services.hyperliquid import sync_hyperliquid_portfolios
 from app.services.schwab import SchwabSession, sync_schwab_portfolio
+from app.ui.ducket_bucket import run_ducket_bucket_ui
 
 
 def main() -> None:
@@ -16,6 +17,10 @@ def main() -> None:
         code = input("Schwab authorization code: ").strip()
         session.exchange_authorization_code(code)
         print("Schwab authorization saved.")
+        return
+
+    if len(sys.argv) > 1 and sys.argv[1] == "ui":
+        run_ducket_bucket_ui()
         return
 
     bucket = DucketBucketSnapshot(
