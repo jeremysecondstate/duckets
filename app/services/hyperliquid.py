@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 
 import requests
+import time
 
 from app.config import HyperliquidAccountConfig, hyperliquid_accounts, hyperliquid_info_url
 from app.models.portfolio import CashBalance, Holding, PortfolioSnapshot
@@ -19,14 +20,31 @@ class HyperliquidInfoClient:
         self.timeout_seconds = timeout_seconds
 
     def post_info(self, payload: dict[str, Any]) -> Any:
-        response = requests.post(
-            self.info_url,
-            json=payload,
-            headers={"Content-Type": "application/json"},
-            timeout=self.timeout_seconds,
-        )
-        response.raise_for_status()
-        return response.json()
+        last_error: Exception | None = None
+
+        for attempt in range(3):
+            try:
+                response = requests.post(
+                    self.info_url,
+                    json=payload,
+                    headers={"Content-Type": "application/json"},
+                    timeout=self.timeout_seconds,
+                )
+
+                if response.status_code in {502, 503, 504} and attempt < 2:
+                    time.sleep(0.5 * (attempt + 1))
+                    continue
+
+                response.raise_for_status()
+                return response.json()
+            except requests.RequestException as exc:
+                last_error = exc
+                if attempt < 2:
+                    time.sleep(0.5 * (attempt + 1))
+                    continue
+                raise
+
+        raise RuntimeError(f"Hyperliquid info request failed: {last_error}")
 
 
 def sync_hyperliquid_portfolios() -> list[PortfolioSnapshot]:
