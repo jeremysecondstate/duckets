@@ -3,7 +3,6 @@ from __future__ import annotations
 import threading
 import tkinter as tk
 from tkinter import ttk
-from typing import Callable
 
 from app.models.portfolio import PortfolioSnapshot
 from app.services.aggregate import DucketBucketSnapshot
