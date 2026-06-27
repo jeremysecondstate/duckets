@@ -28,7 +28,7 @@ def main() -> None:
     print(f"Holdings: ${bucket.holdings_value:,.2f}")
     print(f"Total: ${bucket.total_value:,.2f}")
     print(f"Unrealized PnL: {_money_or_dash(bucket.unrealized_pnl)}")
-    print(f"Day PnL: {_money_or_dash(bucket.day_pnl)}")
+    print(f"Day PnL: {_money_or_dash(bucket.day_pnl)} ({_coverage_or_dash(bucket.day_pnl_accounts)})")
 
     for snapshot in bucket.snapshots:
         print()
@@ -39,7 +39,7 @@ def main() -> None:
         print(f"Holdings: ${snapshot.holdings_value:,.2f}")
         print(f"Total: ${snapshot.total_value:,.2f}")
         print(f"Unrealized PnL: {_money_or_dash(snapshot.unrealized_pnl)}")
-        print(f"Day PnL: {_money_or_dash(bucket.day_pnl)} ({_coverage_or_dash(bucket.day_pnl_accounts)})")
+        print(f"Day PnL: {_money_or_dash(snapshot.day_pnl)}")
 
         print()
         print("Cash")
