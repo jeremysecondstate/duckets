@@ -8,7 +8,7 @@ from tkinter import messagebox, ttk
 from app.models.portfolio import PortfolioSnapshot
 from app.services.aggregate import DucketBucketSnapshot
 from app.services.hyperliquid import sync_hyperliquid_portfolios
-from app.services.schwab import sync_schwab_portfolio
+from app.services.schwab import sync_schwab_portfolio, SchwabSession
 
 BACKGROUND = "#0b1220"
 SURFACE = "#111827"
@@ -140,12 +140,9 @@ class DucketBucketApp:
             sync_snapshots=lambda: [sync_schwab_portfolio(), *sync_hyperliquid_portfolios()],
         )
 
-        DucketsTab(
+        SchwabDucketsTab(
             root=self.root,
             parent=schwab_frame,
-            title="Schwab Duckets",
-            sync_button_text="Sync Schwab",
-            sync_snapshots=lambda: [sync_schwab_portfolio()],
         )
 
         DucketsTab(
@@ -355,6 +352,444 @@ class DucketsTab:
 
         for item_id in table.get_children():
             table.delete(item_id)
+
+
+class SchwabDucketsTab(DucketsTab):
+    def __init__(self, root: tk.Tk, parent: ttk.Frame) -> None:
+        self.order_id = tk.StringVar()
+        self.chain_symbol = tk.StringVar()
+        self.chain_strikes = tk.StringVar(value="10")
+
+        self.stock_symbol = tk.StringVar()
+        self.stock_side = tk.StringVar(value="BUY")
+        self.stock_order_type = tk.StringVar(value="LIMIT")
+        self.stock_quantity = tk.StringVar()
+        self.stock_price = tk.StringVar()
+
+        self.option_symbol = tk.StringVar()
+        self.option_side = tk.StringVar(value="BUY_TO_OPEN")
+        self.option_order_type = tk.StringVar(value="LIMIT")
+        self.option_quantity = tk.StringVar()
+        self.option_price = tk.StringVar()
+
+        self.open_orders_table: ttk.Treeview | None = None
+        self.recent_orders_table: ttk.Treeview | None = None
+        self.option_chain_table: ttk.Treeview | None = None
+
+        super().__init__(
+            root=root,
+            parent=parent,
+            title="Schwab Duckets",
+            sync_button_text="Sync Schwab",
+            sync_snapshots=lambda: [sync_schwab_portfolio()],
+        )
+
+    def _build(self, parent: ttk.Frame, title: str, sync_button_text: str) -> None:
+        super()._build(parent, title, sync_button_text)
+
+        actions_frame = ttk.LabelFrame(parent, text="Schwab Order Actions")
+        actions_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=(0, 16))
+
+        actions_panes = ttk.PanedWindow(actions_frame, orient=tk.HORIZONTAL)
+        actions_panes.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+
+        left_frame = ttk.Frame(actions_panes)
+        right_frame = ttk.Frame(actions_panes)
+
+        actions_panes.add(left_frame, weight=2)
+        actions_panes.add(right_frame, weight=3)
+
+        self._build_ticket_panel(left_frame)
+        self._build_orders_panel(right_frame)
+        self._build_option_chain_panel(right_frame)
+
+    def _build_ticket_panel(self, parent: ttk.Frame) -> None:
+        stock_frame = ttk.LabelFrame(parent, text="Stock / ETF Ticket")
+        stock_frame.pack(fill=tk.X, pady=(0, 10))
+
+        self._entry_row(stock_frame, "Symbol", self.stock_symbol, 0, 0)
+        self._combo_row(stock_frame, "Side", self.stock_side, ("BUY", "SELL"), 0, 2)
+        self._combo_row(stock_frame, "Order Type", self.stock_order_type, ("LIMIT", "MARKET"), 1, 0)
+        self._entry_row(stock_frame, "Quantity", self.stock_quantity, 1, 2)
+        self._entry_row(stock_frame, "Limit Price", self.stock_price, 2, 0)
+
+        ttk.Button(stock_frame, text="Submit Stock / ETF Order", command=self._submit_stock_order).grid(
+            row=3,
+            column=0,
+            columnspan=4,
+            sticky="ew",
+            padx=8,
+            pady=8,
+        )
+
+        option_frame = ttk.LabelFrame(parent, text="Option Ticket")
+        option_frame.pack(fill=tk.X, pady=(0, 10))
+
+        self._entry_row(option_frame, "Option Symbol", self.option_symbol, 0, 0)
+        self._combo_row(
+            option_frame,
+            "Side",
+            self.option_side,
+            ("BUY_TO_OPEN", "SELL_TO_CLOSE", "SELL_TO_OPEN", "BUY_TO_CLOSE"),
+            0,
+            2,
+        )
+        self._combo_row(option_frame, "Order Type", self.option_order_type, ("LIMIT", "MARKET"), 1, 0)
+        self._entry_row(option_frame, "Quantity", self.option_quantity, 1, 2)
+        self._entry_row(option_frame, "Limit Price", self.option_price, 2, 0)
+
+        ttk.Button(option_frame, text="Submit Option Order", command=self._submit_option_order).grid(
+            row=3,
+            column=0,
+            columnspan=4,
+            sticky="ew",
+            padx=8,
+            pady=8,
+        )
+
+        cancel_frame = ttk.LabelFrame(parent, text="Cancel Order")
+        cancel_frame.pack(fill=tk.X)
+
+        self._entry_row(cancel_frame, "Order ID", self.order_id, 0, 0)
+        ttk.Button(cancel_frame, text="Cancel Order", command=self._cancel_order).grid(
+            row=1,
+            column=0,
+            columnspan=4,
+            sticky="ew",
+            padx=8,
+            pady=8,
+        )
+
+    def _build_orders_panel(self, parent: ttk.Frame) -> None:
+        orders_frame = ttk.LabelFrame(parent, text="Orders")
+        orders_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+
+        button_row = ttk.Frame(orders_frame)
+        button_row.pack(fill=tk.X, padx=8, pady=8)
+
+        ttk.Button(button_row, text="Open Orders", command=self._load_open_orders).pack(side=tk.LEFT, padx=(0, 8))
+        ttk.Button(button_row, text="Recent Orders", command=self._load_recent_orders).pack(side=tk.LEFT)
+
+        tables = ttk.PanedWindow(orders_frame, orient=tk.VERTICAL)
+        tables.pack(fill=tk.BOTH, expand=True, padx=8, pady=(0, 8))
+
+        open_frame = ttk.LabelFrame(tables, text="Open Orders")
+        recent_frame = ttk.LabelFrame(tables, text="Recent Orders")
+
+        tables.add(open_frame, weight=1)
+        tables.add(recent_frame, weight=1)
+
+        self.open_orders_table = self._orders_table(open_frame)
+        self.recent_orders_table = self._orders_table(recent_frame)
+
+    def _build_option_chain_panel(self, parent: ttk.Frame) -> None:
+        chain_frame = ttk.LabelFrame(parent, text="Options Chain")
+        chain_frame.pack(fill=tk.BOTH, expand=True)
+
+        input_row = ttk.Frame(chain_frame)
+        input_row.pack(fill=tk.X, padx=8, pady=8)
+
+        ttk.Label(input_row, text="Symbol").pack(side=tk.LEFT)
+        ttk.Entry(input_row, textvariable=self.chain_symbol, width=12).pack(side=tk.LEFT, padx=(6, 12))
+
+        ttk.Label(input_row, text="Strikes").pack(side=tk.LEFT)
+        ttk.Entry(input_row, textvariable=self.chain_strikes, width=8).pack(side=tk.LEFT, padx=(6, 12))
+
+        ttk.Button(input_row, text="Load Options Chain", command=self._load_option_chain).pack(side=tk.LEFT)
+
+        self.option_chain_table = ttk.Treeview(
+            chain_frame,
+            columns=("symbol", "expiration", "strike", "side", "bid", "ask", "mark"),
+            show="headings",
+            height=8,
+        )
+        self._setup_column(self.option_chain_table, "symbol", "Symbol", 220)
+        self._setup_column(self.option_chain_table, "expiration", "Expiration", 100)
+        self._setup_column(self.option_chain_table, "strike", "Strike", 90, anchor=tk.E)
+        self._setup_column(self.option_chain_table, "side", "Side", 70)
+        self._setup_column(self.option_chain_table, "bid", "Bid", 90, anchor=tk.E)
+        self._setup_column(self.option_chain_table, "ask", "Ask", 90, anchor=tk.E)
+        self._setup_column(self.option_chain_table, "mark", "Mark", 90, anchor=tk.E)
+        self.option_chain_table.pack(fill=tk.BOTH, expand=True, padx=8, pady=(0, 8))
+        self.option_chain_table.bind("<<TreeviewSelect>>", self._use_selected_option)
+
+    def _orders_table(self, parent: ttk.Frame) -> ttk.Treeview:
+        table = ttk.Treeview(
+            parent,
+            columns=("order_id", "status", "entered", "symbol", "side", "quantity", "price"),
+            show="headings",
+            height=6,
+        )
+        self._setup_column(table, "order_id", "Order ID", 120)
+        self._setup_column(table, "status", "Status", 100)
+        self._setup_column(table, "entered", "Entered", 160)
+        self._setup_column(table, "symbol", "Symbol", 120)
+        self._setup_column(table, "side", "Side", 120)
+        self._setup_column(table, "quantity", "Qty", 80, anchor=tk.E)
+        self._setup_column(table, "price", "Price", 100, anchor=tk.E)
+        table.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+        return table
+
+    def _entry_row(
+        self,
+        parent: ttk.LabelFrame,
+        label: str,
+        variable: tk.StringVar,
+        row: int,
+        column: int,
+    ) -> None:
+        ttk.Label(parent, text=label).grid(row=row, column=column, sticky="w", padx=8, pady=6)
+        ttk.Entry(parent, textvariable=variable).grid(row=row, column=column + 1, sticky="ew", padx=8, pady=6)
+        parent.columnconfigure(column + 1, weight=1)
+
+    def _combo_row(
+        self,
+        parent: ttk.LabelFrame,
+        label: str,
+        variable: tk.StringVar,
+        values: tuple[str, ...],
+        row: int,
+        column: int,
+    ) -> None:
+        ttk.Label(parent, text=label).grid(row=row, column=column, sticky="w", padx=8, pady=6)
+        ttk.Combobox(parent, textvariable=variable, values=values, state="readonly").grid(
+            row=row,
+            column=column + 1,
+            sticky="ew",
+            padx=8,
+            pady=6,
+        )
+        parent.columnconfigure(column + 1, weight=1)
+
+    def _load_open_orders(self) -> None:
+        try:
+            orders = SchwabSession().get_open_orders()
+            self._show_orders(self.open_orders_table, orders)
+        except Exception as exc:
+            messagebox.showerror("Open orders failed", f"{type(exc).__name__}: {exc}")
+
+    def _load_recent_orders(self) -> None:
+        try:
+            orders = SchwabSession().get_recent_orders()
+            self._show_orders(self.recent_orders_table, orders)
+        except Exception as exc:
+            messagebox.showerror("Recent orders failed", f"{type(exc).__name__}: {exc}")
+
+    def _load_option_chain(self) -> None:
+        try:
+            strikes = int(self.chain_strikes.get().strip())
+            chain = SchwabSession().get_option_chain(self.chain_symbol.get(), strikes)
+            self._show_option_chain(chain)
+        except Exception as exc:
+            messagebox.showerror("Option chain failed", f"{type(exc).__name__}: {exc}")
+
+    def _cancel_order(self) -> None:
+        try:
+            result = SchwabSession().cancel_order(self.order_id.get())
+            messagebox.showinfo("Cancel order", f"Cancel response: {result}")
+        except Exception as exc:
+            messagebox.showerror("Cancel order failed", f"{type(exc).__name__}: {exc}")
+
+    def _submit_stock_order(self) -> None:
+        try:
+            payload = self._stock_order_payload()
+            location = SchwabSession().submit_order(payload)
+            messagebox.showinfo("Stock / ETF order submitted", f"Location: {location}")
+        except Exception as exc:
+            messagebox.showerror("Stock / ETF order failed", f"{type(exc).__name__}: {exc}")
+
+    def _submit_option_order(self) -> None:
+        try:
+            payload = self._option_order_payload()
+            location = SchwabSession().submit_order(payload)
+            messagebox.showinfo("Option order submitted", f"Location: {location}")
+        except Exception as exc:
+            messagebox.showerror("Option order failed", f"{type(exc).__name__}: {exc}")
+
+    def _stock_order_payload(self) -> dict[str, object]:
+        symbol = self.stock_symbol.get().strip().upper()
+        quantity = int(self.stock_quantity.get().strip())
+        order_type = self.stock_order_type.get().strip().upper()
+        side = self.stock_side.get().strip().upper()
+
+        if not symbol:
+            raise ValueError("Stock / ETF symbol is required.")
+
+        payload: dict[str, object] = {
+            "orderType": order_type,
+            "session": "NORMAL",
+            "duration": "DAY",
+            "orderStrategyType": "SINGLE",
+            "orderLegCollection": [
+                {
+                    "instruction": side,
+                    "quantity": quantity,
+                    "instrument": {
+                        "symbol": symbol,
+                        "assetType": "EQUITY",
+                    },
+                }
+            ],
+        }
+
+        if order_type == "LIMIT":
+            payload["price"] = self.stock_price.get().strip()
+
+        return payload
+
+    def _option_order_payload(self) -> dict[str, object]:
+        symbol = self.option_symbol.get().strip().upper()
+        quantity = int(self.option_quantity.get().strip())
+        order_type = self.option_order_type.get().strip().upper()
+        side = self.option_side.get().strip().upper()
+
+        if not symbol:
+            raise ValueError("Option symbol is required.")
+
+        payload: dict[str, object] = {
+            "orderType": order_type,
+            "session": "NORMAL",
+            "duration": "DAY",
+            "orderStrategyType": "SINGLE",
+            "orderLegCollection": [
+                {
+                    "instruction": side,
+                    "quantity": quantity,
+                    "instrument": {
+                        "symbol": symbol,
+                        "assetType": "OPTION",
+                    },
+                }
+            ],
+        }
+
+        if order_type == "LIMIT":
+            payload["price"] = self.option_price.get().strip()
+
+        return payload
+
+    def _show_orders(self, table: ttk.Treeview | None, orders: object) -> None:
+        if table is None:
+            return
+
+        self._clear_table(table)
+
+        if not isinstance(orders, list):
+            return
+
+        for order in orders:
+            if not isinstance(order, dict):
+                continue
+
+            order_id = str(order.get("orderId") or "")
+            status = str(order.get("status") or "")
+            entered = str(order.get("enteredTime") or "")
+            leg = _first_order_leg(order)
+            symbol = str(leg.get("symbol") or "")
+            side = str(leg.get("instruction") or "")
+            quantity = str(leg.get("quantity") or "")
+            price = str(order.get("price") or "")
+
+            table.insert(
+                "",
+                tk.END,
+                values=(order_id, status, entered, symbol, side, quantity, price),
+            )
+
+    def _show_option_chain(self, chain: object) -> None:
+        if self.option_chain_table is None:
+            return
+
+        self._clear_table(self.option_chain_table)
+
+        for row in _option_chain_rows(chain):
+            self.option_chain_table.insert(
+                "",
+                tk.END,
+                values=(
+                    row["symbol"],
+                    row["expiration"],
+                    row["strike"],
+                    row["side"],
+                    row["bid"],
+                    row["ask"],
+                    row["mark"],
+                ),
+            )
+
+    def _use_selected_option(self, _event: object) -> None:
+        if self.option_chain_table is None:
+            return
+
+        selected = self.option_chain_table.selection()
+        if not selected:
+            return
+
+        values = self.option_chain_table.item(selected[0], "values")
+        if not values:
+            return
+
+        self.option_symbol.set(str(values[0]))
+
+
+def _first_order_leg(order: dict[str, object]) -> dict[str, object]:
+    legs = order.get("orderLegCollection")
+    if not isinstance(legs, list) or not legs:
+        return {}
+
+    first_leg = legs[0]
+    if not isinstance(first_leg, dict):
+        return {}
+
+    instrument = first_leg.get("instrument")
+    symbol = ""
+    if isinstance(instrument, dict):
+        symbol = str(instrument.get("symbol") or "")
+
+    return {
+        "symbol": symbol,
+        "instruction": first_leg.get("instruction"),
+        "quantity": first_leg.get("quantity"),
+    }
+
+
+def _option_chain_rows(chain: object) -> list[dict[str, object]]:
+    if not isinstance(chain, dict):
+        return []
+
+    rows: list[dict[str, object]] = []
+
+    for side, map_name in (("CALL", "callExpDateMap"), ("PUT", "putExpDateMap")):
+        exp_map = chain.get(map_name)
+        if not isinstance(exp_map, dict):
+            continue
+
+        for expiration_key, strikes in exp_map.items():
+            expiration = str(expiration_key).split(":", 1)[0]
+            if not isinstance(strikes, dict):
+                continue
+
+            for strike, contracts in strikes.items():
+                if not isinstance(contracts, list):
+                    continue
+
+                for contract in contracts:
+                    if not isinstance(contract, dict):
+                        continue
+
+                    rows.append(
+                        {
+                            "symbol": contract.get("symbol") or "",
+                            "expiration": expiration,
+                            "strike": strike,
+                            "side": side,
+                            "bid": contract.get("bid") or "",
+                            "ask": contract.get("ask") or "",
+                            "mark": contract.get("mark") or "",
+                        }
+                    )
+
+    return rows
 
 
 def _money(value: float) -> str:

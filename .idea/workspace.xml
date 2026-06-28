@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add Schwab order and option chain API methods">
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="import changes to schwab.py and adding schwab, hyperliquid, and databento API docs in a folder called 'docs'">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/schwab.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/schwab.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/ui/ducket_bucket.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ui/ducket_bucket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,21 +43,21 @@
     <decayedCancelled>
       <entry key="MS100" value="0.0" />
       <entry key="MS500" value="0.0" />
-      <entry key="S2" value="0.0" />
-      <entry key="S5" value="0.0" />
-      <entry key="S10" value="3.939471663686255E-257" />
-      <entry key="S30" value="2.0058121837732497E-85" />
-      <entry key="S60" value="1.727345143655719E-42" />
-      <entry key="M2" value="5.084841079297459E-21" />
-      <entry key="M5" value="3.8741838169563646E-8" />
-      <entry key="M10" value="7.703488099976406E-4" />
-      <entry key="M15" value="0.02131498648737953" />
-      <entry key="M30" value="0.6220858665574661" />
-      <entry key="H1" value="3.518517546691207" />
-      <entry key="H2" value="8.533220408151402" />
-      <entry key="H4" value="13.982100169871323" />
-      <entry key="D1" value="51.96663586240441" />
-      <entry key="W1" value="85.03094595553773" />
+      <entry key="S2" value="7.350896446659732E-135" />
+      <entry key="S5" value="8.664835061786996E-54" />
+      <entry key="S10" value="1.3012886104167705E-26" />
+      <entry key="S30" value="2.1923508036803215E-8" />
+      <entry key="S60" value="8.18733042790084E-4" />
+      <entry key="M2" value="0.15904552628208102" />
+      <entry key="M5" value="3.7605631417802106" />
+      <entry key="M10" value="10.796394225384123" />
+      <entry key="M15" value="15.344994106884247" />
+      <entry key="M30" value="21.810270419154527" />
+      <entry key="H1" value="26.002445278213234" />
+      <entry key="H2" value="28.458206582849662" />
+      <entry key="H4" value="30.90469324982916" />
+      <entry key="D1" value="65.46586497074998" />
+      <entry key="W1" value="111.22892841189321" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="1.0" />
@@ -68,34 +68,34 @@
       <entry key="S30" value="1.0" />
       <entry key="S60" value="1.0" />
       <entry key="M2" value="1.0" />
-      <entry key="M5" value="1.000000000001887" />
-      <entry key="M10" value="1.0000013736650224" />
-      <entry key="M15" value="1.0001235721377792" />
-      <entry key="M30" value="1.0111163005437604" />
-      <entry key="H1" value="1.1054339127279407" />
-      <entry key="H2" value="1.3249972531397658" />
-      <entry key="H4" value="1.5938167322982628" />
-      <entry key="D1" value="2.8665265616169693" />
-      <entry key="W1" value="3.786499507456224" />
+      <entry key="M5" value="1.0" />
+      <entry key="M10" value="1.0" />
+      <entry key="M15" value="1.0" />
+      <entry key="M30" value="1.0000000038115342" />
+      <entry key="H1" value="1.000067870669859" />
+      <entry key="H2" value="1.0103822062880756" />
+      <entry key="H4" value="1.1410833358400603" />
+      <entry key="D1" value="2.913648605880697" />
+      <entry key="W1" value="4.574105477663249" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="3.999003307673225E-5" />
-      <entry key="MS500" value="0.13194421470474582" />
-      <entry key="S2" value="0.6026949994755577" />
-      <entry key="S5" value="0.8166557707333713" />
-      <entry key="S10" value="0.9036900855566422" />
-      <entry key="S30" value="0.9668071180520862" />
-      <entry key="S60" value="0.9832635038747681" />
-      <entry key="M2" value="0.991596442044226" />
-      <entry key="M5" value="0.9966301029962708" />
-      <entry key="M10" value="0.9990853124395285" />
-      <entry key="M15" value="1.020313075270639" />
-      <entry key="M30" value="1.6326029239172228" />
-      <entry key="H1" value="4.623499167855527" />
-      <entry key="H2" value="9.857815191178526" />
-      <entry key="H4" value="15.575614811326934" />
-      <entry key="D1" value="54.83306852722049" />
-      <entry key="W1" value="88.81742839885739" />
+      <entry key="MS100" value="1.586035165866257E-8" />
+      <entry key="MS500" value="0.027546254934599064" />
+      <entry key="S2" value="0.4073949494014435" />
+      <entry key="S5" value="0.69824246256508" />
+      <entry key="S10" value="0.8356090369096543" />
+      <entry key="S30" value="0.9418918798366166" />
+      <entry key="S60" value="0.9713295161254542" />
+      <entry key="M2" value="1.14415559193464" />
+      <entry key="M5" value="4.754254952020136" />
+      <entry key="M10" value="11.792914678090487" />
+      <entry key="M15" value="16.342534527434555" />
+      <entry key="M30" value="22.80894121234489" />
+      <entry key="H1" value="27.00181626998556" />
+      <entry key="H2" value="29.468228017986434" />
+      <entry key="H4" value="32.045568581573626" />
+      <entry key="D1" value="68.37942032708642" />
+      <entry key="W1" value="115.80301340720793" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -157,7 +157,7 @@
       <updated>1782170828027</updated>
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
-      <workItem from="1782492563563" duration="20134000" />
+      <workItem from="1782492563563" duration="21297000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -335,7 +335,15 @@
       <option name="project" value="LOCAL" />
       <updated>1782682677767</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="import changes to schwab.py and adding schwab, hyperliquid, and databento API docs in a folder called 'docs'">
+      <option name="closed" value="true" />
+      <created>1782688993587</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1782688993587</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -362,7 +370,8 @@
     <MESSAGE value="Add Schwab and Hyperliquid Duckets tabs" />
     <MESSAGE value="fixed _build_layout() inner method bug!" />
     <MESSAGE value="Add Schwab order and option chain API methods" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add Schwab order and option chain API methods" />
+    <MESSAGE value="import changes to schwab.py and adding schwab, hyperliquid, and databento API docs in a folder called 'docs'" />
+    <option name="LAST_COMMIT_MESSAGE" value="import changes to schwab.py and adding schwab, hyperliquid, and databento API docs in a folder called 'docs'" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
