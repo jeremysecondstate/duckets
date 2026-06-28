@@ -17,6 +17,8 @@ MUTED_TEXT = "#9ca3af"
 ACCENT = "#60a5fa"
 BORDER = "#374151"
 TABLE_FIELD = "#0f172a"
+HEADER_HOVER = "#dbeafe"
+HEADER_HOVER_TEXT = "#020617"
 
 
 def run_ducket_bucket_ui() -> None:
@@ -95,6 +97,17 @@ class DucketBucketApp:
             bordercolor=BORDER,
         )
         style.map(
+            "Treeview.Heading",
+            background=[
+                ("active", HEADER_HOVER),
+                ("pressed", HEADER_HOVER),
+            ],
+            foreground=[
+                ("active", HEADER_HOVER_TEXT),
+                ("pressed", HEADER_HOVER_TEXT),
+            ],
+        )
+        style.map(
             "Treeview",
             background=[("selected", ACCENT)],
             foreground=[("selected", "#020617")],
@@ -128,8 +141,11 @@ class DucketBucketApp:
 
         ttk.Label(root_frame, textvariable=self.status).pack(anchor=tk.W, pady=(0, 8))
 
-        cash_frame = ttk.LabelFrame(root_frame, text="Cash")
-        cash_frame.pack(fill=tk.BOTH, expand=False, pady=(0, 12))
+        content_panes = ttk.PanedWindow(root_frame, orient=tk.VERTICAL)
+        content_panes.pack(fill=tk.BOTH, expand=True)
+
+        cash_frame = ttk.LabelFrame(content_panes, text="Cash")
+        content_panes.add(cash_frame, weight=1)
 
         self.cash_table = ttk.Treeview(
             cash_frame,
@@ -144,8 +160,8 @@ class DucketBucketApp:
         self._setup_column(self.cash_table, "value", "Value", 140, anchor=tk.E)
         self.cash_table.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
 
-        holdings_frame = ttk.LabelFrame(root_frame, text="Holdings")
-        holdings_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 12))
+        holdings_frame = ttk.LabelFrame(content_panes, text="Holdings")
+        content_panes.add(holdings_frame, weight=4)
 
         self.holdings_table = ttk.Treeview(
             holdings_frame,
@@ -163,10 +179,18 @@ class DucketBucketApp:
         self._setup_column(self.holdings_table, "day_pnl", "Day PnL", 120, anchor=tk.E)
         self.holdings_table.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
 
-        status_frame = ttk.LabelFrame(root_frame, text="Sync Status")
-        status_frame.pack(fill=tk.BOTH, expand=False)
+        status_frame = ttk.LabelFrame(content_panes, text="Sync Status")
+        content_panes.add(status_frame, weight=1)
 
-        self.status_text = tk.Text(status_frame, height=5, wrap=tk.WORD, background=TABLE_FIELD, foreground=TEXT, insertbackground=TEXT, relief=tk.FLAT,)
+        self.status_text = tk.Text(
+            status_frame,
+            height=5,
+            wrap=tk.WORD,
+            background=TABLE_FIELD,
+            foreground=TEXT,
+            insertbackground=TEXT,
+            relief=tk.FLAT,
+        )
         self.status_text.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
         self.status_text.insert(tk.END, "Click Sync Bucket to load Schwab, Jeremy, and Alex.\n")
         self.status_text.configure(state=tk.DISABLED)
