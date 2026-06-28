@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import secrets
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Any
 from urllib.parse import urlencode
 
@@ -17,10 +17,10 @@ from app.services.schwab_token_store import (
     save_token_payload,
 )
 
-
+TRADER_BASE_URL = "https://api.schwabapi.com/trader/v1"
+MARKETDATA_BASE_URL = "https://api.schwabapi.com/marketdata/v1"
 AUTH_URL = "https://api.schwabapi.com/v1/oauth/authorize"
 TOKEN_URL = "https://api.schwabapi.com/v1/oauth/token"
-TRADER_BASE_URL = "https://api.schwabapi.com/trader/v1"
 
 
 class SchwabSession:
@@ -156,6 +156,97 @@ class SchwabSession:
         self.access_token = str(payload["access_token"])
         self.access_token_expires_at = cached_access_token_expires_at(cached_payload)
         self.refresh_token = str(payload.get("refresh_token") or previous_refresh_token or "")
+
+    def get_open_orders(self) -> Any:
+        now = datetime.now(timezone.utc)
+        return self.get_orders(
+            from_entered_time=now - timedelta(days=14),
+            to_entered_time=now,
+            status="WORKING",
+        )
+
+    def get_recent_orders(self) -> Any:
+        now = datetime.now(timezone.utc)
+        return self.get_orders(
+            from_entered_time=now - timedelta(days=14),
+            to_entered_time=now,
+        )
+
+    def get_orders(
+        self,
+        *,
+        from_entered_time: datetime,
+        to_entered_time: datetime,
+        status: str | None = None,
+    ) -> Any:
+        account_hash = self._get_account_hash()
+        params = {
+            "fromEnteredTime": from_entered_time.astimezone(timezone.utc).isoformat(timespec="seconds"),
+            "toEnteredTime": to_entered_time.astimezone(timezone.utc).isoformat(timespec="seconds"),
+        }
+        if status:
+            params["status"] = status
+
+        response = requests.get(
+            f"{TRADER_BASE_URL}/accounts/{account_hash}/orders",
+            headers=self._headers(),
+            params=params,
+            timeout=10,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def get_option_chain(self, symbol: str, strikes: int) -> Any:
+        cleaned_symbol = symbol.strip().upper()
+        if not cleaned_symbol:
+            raise ValueError("Symbol is required for option chain.")
+
+        response = requests.get(
+            f"{MARKETDATA_BASE_URL}/chains",
+            headers=self._headers(),
+            params={
+                "symbol": cleaned_symbol,
+                "contractType": "ALL",
+                "strikeCount": strikes,
+                "includeUnderlyingQuote": "true",
+                "strategy": "SINGLE",
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def cancel_order(self, order_id: str) -> object:
+        cleaned_order_id = str(order_id).strip()
+        if not cleaned_order_id:
+            raise ValueError("Order ID is required for cancel.")
+
+        account_hash = self._get_account_hash()
+        response = requests.delete(
+            f"{TRADER_BASE_URL}/accounts/{account_hash}/orders/{cleaned_order_id}",
+            headers=self._headers(),
+            timeout=10,
+        )
+        response.raise_for_status()
+
+        if not response.text:
+            return None
+
+        try:
+            return response.json()
+        except ValueError:
+            return response.text
+
+    def submit_order(self, order_payload: dict[str, Any]) -> str | None:
+        account_hash = self._get_account_hash()
+        response = requests.post(
+            f"{TRADER_BASE_URL}/accounts/{account_hash}/orders",
+            headers={**self._headers(), "Content-Type": "application/json"},
+            json=order_payload,
+            timeout=10,
+        )
+        response.raise_for_status()
+        return response.headers.get("Location")
 
 
 def sync_schwab_portfolio() -> PortfolioSnapshot:

@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add Schwab and Hyperliquid Duckets tabs" />
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="fixed _build_layout() inner method bug!">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/schwab.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/schwab.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,23 +41,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4454999607573159E-6" />
-      <entry key="MS500" value="0.06976398359448308" />
-      <entry key="S2" value="1.0712684411202995" />
-      <entry key="S5" value="2.651912864588565" />
-      <entry key="S10" value="3.8396913439606237" />
-      <entry key="S30" value="5.110840802837875" />
-      <entry key="S60" value="5.52822149118599" />
-      <entry key="M2" value="5.756726621054104" />
-      <entry key="M5" value="5.900836855727091" />
-      <entry key="M10" value="5.950102355903282" />
-      <entry key="M15" value="5.966664127960439" />
-      <entry key="M30" value="5.983296540440268" />
-      <entry key="H1" value="5.991645388164499" />
-      <entry key="H2" value="6.014066261585155" />
-      <entry key="H4" value="7.102118994581697" />
-      <entry key="D1" value="41.692543264161415" />
-      <entry key="W1" value="71.12341925679858" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="3.939471663686255E-257" />
+      <entry key="S30" value="2.0058121837732497E-85" />
+      <entry key="S60" value="1.727345143655719E-42" />
+      <entry key="M2" value="5.084841079297459E-21" />
+      <entry key="M5" value="3.8741838169563646E-8" />
+      <entry key="M10" value="7.703488099976406E-4" />
+      <entry key="M15" value="0.02131498648737953" />
+      <entry key="M30" value="0.6220858665574661" />
+      <entry key="H1" value="3.518517546691207" />
+      <entry key="H2" value="8.533220408151402" />
+      <entry key="H4" value="13.982100169871323" />
+      <entry key="D1" value="51.96663586240441" />
+      <entry key="W1" value="85.03094595553773" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="1.0" />
@@ -65,34 +68,34 @@
       <entry key="S30" value="1.0" />
       <entry key="S60" value="1.0" />
       <entry key="M2" value="1.0" />
-      <entry key="M5" value="1.0" />
-      <entry key="M10" value="1.0" />
-      <entry key="M15" value="1.0" />
-      <entry key="M30" value="1.000000000000106" />
-      <entry key="H1" value="1.0000004232236126" />
-      <entry key="H2" value="1.0008975365856876" />
-      <entry key="H4" value="1.0420952007001536" />
-      <entry key="D1" value="2.049950316213833" />
-      <entry key="W1" value="2.8240641976460843" />
+      <entry key="M5" value="1.000000000001887" />
+      <entry key="M10" value="1.0000013736650224" />
+      <entry key="M15" value="1.0001235721377792" />
+      <entry key="M30" value="1.0111163005437604" />
+      <entry key="H1" value="1.1054339127279407" />
+      <entry key="H2" value="1.3249972531397658" />
+      <entry key="H4" value="1.5938167322982628" />
+      <entry key="D1" value="2.8665265616169693" />
+      <entry key="W1" value="3.786499507456224" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5923914226561134E-6" />
-      <entry key="MS500" value="0.09963629511135669" />
-      <entry key="S2" value="1.4072943373756222" />
-      <entry key="S5" value="3.206894553633154" />
-      <entry key="S10" value="4.524858169642372" />
-      <entry key="S30" value="5.960468193383338" />
-      <entry key="S60" value="6.444157224569244" />
-      <entry key="M2" value="6.7121235127568335" />
-      <entry key="M5" value="6.8823271832077335" />
-      <entry key="M10" value="6.940731534250037" />
-      <entry key="M15" value="6.960390788492478" />
-      <entry key="M30" value="6.98014671945827" />
-      <entry key="H1" value="6.990067596213496" />
-      <entry key="H2" value="7.014173698665703" />
-      <entry key="H4" value="8.143814457229043" />
-      <entry key="D1" value="43.74240435726993" />
-      <entry key="W1" value="73.9474680010301" />
+      <entry key="MS100" value="3.999003307673225E-5" />
+      <entry key="MS500" value="0.13194421470474582" />
+      <entry key="S2" value="0.6026949994755577" />
+      <entry key="S5" value="0.8166557707333713" />
+      <entry key="S10" value="0.9036900855566422" />
+      <entry key="S30" value="0.9668071180520862" />
+      <entry key="S60" value="0.9832635038747681" />
+      <entry key="M2" value="0.991596442044226" />
+      <entry key="M5" value="0.9966301029962708" />
+      <entry key="M10" value="0.9990853124395285" />
+      <entry key="M15" value="1.020313075270639" />
+      <entry key="M30" value="1.6326029239172228" />
+      <entry key="H1" value="4.623499167855527" />
+      <entry key="H2" value="9.857815191178526" />
+      <entry key="H4" value="15.575614811326934" />
+      <entry key="D1" value="54.83306852722049" />
+      <entry key="W1" value="88.81742839885739" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -154,7 +157,7 @@
       <updated>1782170828027</updated>
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
-      <workItem from="1782492563563" duration="15173000" />
+      <workItem from="1782492563563" duration="18897000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -316,7 +319,15 @@
       <option name="project" value="LOCAL" />
       <updated>1782629486756</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="fixed _build_layout() inner method bug!">
+      <option name="closed" value="true" />
+      <created>1782630969482</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1782630969482</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -341,7 +352,8 @@
     <MESSAGE value="Add dark Ducket Bucket theme" />
     <MESSAGE value="Make Ducket Bucket sections resizable" />
     <MESSAGE value="Add Schwab and Hyperliquid Duckets tabs" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add Schwab and Hyperliquid Duckets tabs" />
+    <MESSAGE value="fixed _build_layout() inner method bug!" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed _build_layout() inner method bug!" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
