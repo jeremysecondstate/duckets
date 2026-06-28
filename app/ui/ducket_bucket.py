@@ -9,6 +9,15 @@ from app.services.aggregate import DucketBucketSnapshot
 from app.services.hyperliquid import sync_hyperliquid_portfolios
 from app.services.schwab import sync_schwab_portfolio
 
+BACKGROUND = "#0b1220"
+SURFACE = "#111827"
+SURFACE_ALT = "#1f2937"
+TEXT = "#e5e7eb"
+MUTED_TEXT = "#9ca3af"
+ACCENT = "#60a5fa"
+BORDER = "#374151"
+TABLE_FIELD = "#0f172a"
+
 
 def run_ducket_bucket_ui() -> None:
     root = tk.Tk()
@@ -21,6 +30,8 @@ class DucketBucketApp:
         self.root = root
         self.root.title("Duckets")
         self.root.geometry("1180x760")
+        self.root.configure(background=BACKGROUND)
+        self._apply_theme()
 
         self.cash_value = tk.StringVar(value="Cash: --")
         self.holdings_value = tk.StringVar(value="Holdings: --")
@@ -35,6 +46,59 @@ class DucketBucketApp:
         self.status_text: tk.Text | None = None
 
         self._build_layout()
+
+    def _apply_theme(self) -> None:
+        style = ttk.Style(self.root)
+        style.theme_use("clam")
+
+        style.configure(".", background=BACKGROUND, foreground=TEXT, fieldbackground=TABLE_FIELD)
+        style.configure("TFrame", background=BACKGROUND)
+        style.configure("TLabel", background=BACKGROUND, foreground=TEXT)
+        style.configure("TLabelframe", background=BACKGROUND, foreground=TEXT, bordercolor=BORDER)
+        style.configure("TLabelframe.Label", background=BACKGROUND, foreground=TEXT)
+        style.configure("TButton", background=SURFACE_ALT, foreground=TEXT, bordercolor=BORDER, focusthickness=1)
+        style.map(
+            "TButton",
+            background=[("active", ACCENT), ("disabled", SURFACE)],
+            foreground=[("disabled", MUTED_TEXT)],
+        )
+
+        style.configure(
+            "Summary.TLabelframe",
+            background=SURFACE,
+            foreground=TEXT,
+            bordercolor=BORDER,
+        )
+        style.configure(
+            "Summary.TLabelframe.Label",
+            background=SURFACE,
+            foreground=TEXT,
+        )
+        style.configure(
+            "Summary.TLabel",
+            background=SURFACE,
+            foreground=TEXT,
+        )
+
+        style.configure(
+            "Treeview",
+            background=TABLE_FIELD,
+            foreground=TEXT,
+            fieldbackground=TABLE_FIELD,
+            bordercolor=BORDER,
+            rowheight=24,
+        )
+        style.configure(
+            "Treeview.Heading",
+            background=SURFACE_ALT,
+            foreground=TEXT,
+            bordercolor=BORDER,
+        )
+        style.map(
+            "Treeview",
+            background=[("selected", ACCENT)],
+            foreground=[("selected", "#020617")],
+        )
 
     def _build_layout(self) -> None:
         root_frame = ttk.Frame(self.root, padding=16)
@@ -58,9 +122,9 @@ class DucketBucketApp:
             self.unrealized_pnl,
             self.day_pnl,
         ):
-            card = ttk.LabelFrame(summary, text="")
+            card = ttk.LabelFrame(summary, text="", style="Summary.TLabelframe")
             card.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
-            ttk.Label(card, textvariable=label_var, font=("Segoe UI", 11, "bold")).pack(anchor=tk.W, padx=10, pady=10)
+            ttk.Label(card, textvariable=label_var, font=("Segoe UI", 11, "bold"), style="Summary.TLabel",).pack(anchor=tk.W, padx=10, pady=10)
 
         ttk.Label(root_frame, textvariable=self.status).pack(anchor=tk.W, pady=(0, 8))
 
@@ -102,7 +166,7 @@ class DucketBucketApp:
         status_frame = ttk.LabelFrame(root_frame, text="Sync Status")
         status_frame.pack(fill=tk.BOTH, expand=False)
 
-        self.status_text = tk.Text(status_frame, height=5, wrap=tk.WORD)
+        self.status_text = tk.Text(status_frame, height=5, wrap=tk.WORD, background=TABLE_FIELD, foreground=TEXT, insertbackground=TEXT, relief=tk.FLAT,)
         self.status_text.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
         self.status_text.insert(tk.END, "Click Sync Bucket to load Schwab, Jeremy, and Alex.\n")
         self.status_text.configure(state=tk.DISABLED)
