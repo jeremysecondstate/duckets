@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import threading
 import tkinter as tk
-from tkinter import ttk
+from collections.abc import Callable
+from tkinter import messagebox, ttk
 
 from app.models.portfolio import PortfolioSnapshot
 from app.services.aggregate import DucketBucketSnapshot
@@ -19,6 +20,8 @@ BORDER = "#374151"
 TABLE_FIELD = "#0f172a"
 HEADER_HOVER = "#dbeafe"
 HEADER_HOVER_TEXT = "#020617"
+SUCCESS = "#22c55e"
+DANGER = "#ef4444"
 
 
 def run_ducket_bucket_ui() -> None:
@@ -34,18 +37,6 @@ class DucketBucketApp:
         self.root.geometry("1180x760")
         self.root.configure(background=BACKGROUND)
         self._apply_theme()
-
-        self.cash_value = tk.StringVar(value="Cash: --")
-        self.holdings_value = tk.StringVar(value="Holdings: --")
-        self.total_value = tk.StringVar(value="Total: --")
-        self.unrealized_pnl = tk.StringVar(value="Unrealized PnL: --")
-        self.day_pnl = tk.StringVar(value="Day PnL: --")
-        self.status = tk.StringVar(value="Ready.")
-
-        self.sync_button: ttk.Button | None = None
-        self.cash_table: ttk.Treeview | None = None
-        self.holdings_table: ttk.Treeview | None = None
-        self.status_text: tk.Text | None = None
 
         self._build_layout()
 
@@ -112,18 +103,104 @@ class DucketBucketApp:
             background=[("selected", ACCENT)],
             foreground=[("selected", "#020617")],
         )
+        style.configure(
+            "TNotebook",
+            background=BACKGROUND,
+            bordercolor=BORDER,
+        )
+        style.configure(
+            "TNotebook.Tab",
+            background=SURFACE,
+            foreground=TEXT,
+            padding=(14, 8),
+        )
+        style.map(
+            "TNotebook.Tab",
+            background=[("selected", SURFACE_ALT), ("active", HEADER_HOVER)],
+            foreground=[("selected", TEXT), ("active", HEADER_HOVER_TEXT)],
+        )
 
     def _build_layout(self) -> None:
-        root_frame = ttk.Frame(self.root, padding=16)
+        def _build_layout(self) -> None:
+            notebook = ttk.Notebook(self.root)
+            notebook.pack(fill=tk.BOTH, expand=True)
+
+            bucket_frame = ttk.Frame(notebook)
+            schwab_frame = ttk.Frame(notebook)
+            hyperliquid_frame = ttk.Frame(notebook)
+
+            notebook.add(bucket_frame, text="Ducket Bucket")
+            notebook.add(schwab_frame, text="Schwab Duckets")
+            notebook.add(hyperliquid_frame, text="Hyperliquid Duckets")
+
+            DucketsTab(
+                root=self.root,
+                parent=bucket_frame,
+                title="Ducket Bucket",
+                sync_button_text="Sync Bucket",
+                sync_snapshots=lambda: [sync_schwab_portfolio(), *sync_hyperliquid_portfolios()],
+            )
+
+            DucketsTab(
+                root=self.root,
+                parent=schwab_frame,
+                title="Schwab Duckets",
+                sync_button_text="Sync Schwab",
+                sync_snapshots=lambda: [sync_schwab_portfolio()],
+            )
+
+            DucketsTab(
+                root=self.root,
+                parent=hyperliquid_frame,
+                title="Hyperliquid Duckets",
+                sync_button_text="Sync Hyperliquid",
+                sync_snapshots=sync_hyperliquid_portfolios,
+            )
+
+
+class DucketsTab:
+    def __init__(
+        self,
+        root: tk.Tk,
+        parent: ttk.Frame,
+        title: str,
+        sync_button_text: str,
+        sync_snapshots: Callable[[], list[PortfolioSnapshot]],
+    ) -> None:
+        self.root = root
+        self.sync_snapshots = sync_snapshots
+
+        self.cash_value = tk.StringVar(value="Cash: --")
+        self.holdings_value = tk.StringVar(value="Holdings: --")
+        self.total_value = tk.StringVar(value="Total: --")
+        self.unrealized_pnl = tk.StringVar(value="Unrealized PnL: --")
+        self.day_pnl = tk.StringVar(value="Day PnL: --")
+        self.status_icon = tk.StringVar(value="❌")
+
+        self.sync_button: ttk.Button | None = None
+        self.cash_table: ttk.Treeview | None = None
+        self.holdings_table: ttk.Treeview | None = None
+
+        self._build(parent, title, sync_button_text)
+
+    def _build(self, parent: ttk.Frame, title: str, sync_button_text: str) -> None:
+        root_frame = ttk.Frame(parent, padding=16)
         root_frame.pack(fill=tk.BOTH, expand=True)
 
         header = ttk.Frame(root_frame)
         header.pack(fill=tk.X)
 
-        ttk.Label(header, text="Ducket Bucket", font=("Segoe UI", 22, "bold")).pack(side=tk.LEFT)
+        ttk.Label(header, text=title, font=("Segoe UI", 22, "bold")).pack(side=tk.LEFT)
 
-        self.sync_button = ttk.Button(header, text="Sync Bucket", command=self._sync_bucket)
+        self.sync_button = ttk.Button(header, text=sync_button_text, command=self._sync)
         self.sync_button.pack(side=tk.RIGHT)
+
+        ttk.Label(
+            header,
+            textvariable=self.status_icon,
+            font=("Segoe UI", 16, "bold"),
+            foreground=DANGER,
+        ).pack(side=tk.RIGHT, padx=(0, 10))
 
         summary = ttk.Frame(root_frame)
         summary.pack(fill=tk.X, pady=(16, 12))
@@ -137,9 +214,12 @@ class DucketBucketApp:
         ):
             card = ttk.LabelFrame(summary, text="", style="Summary.TLabelframe")
             card.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
-            ttk.Label(card, textvariable=label_var, font=("Segoe UI", 11, "bold"), style="Summary.TLabel",).pack(anchor=tk.W, padx=10, pady=10)
-
-        ttk.Label(root_frame, textvariable=self.status).pack(anchor=tk.W, pady=(0, 8))
+            ttk.Label(
+                card,
+                textvariable=label_var,
+                font=("Segoe UI", 11, "bold"),
+                style="Summary.TLabel",
+            ).pack(anchor=tk.W, padx=10, pady=10)
 
         content_panes = ttk.PanedWindow(root_frame, orient=tk.VERTICAL)
         content_panes.pack(fill=tk.BOTH, expand=True)
@@ -179,22 +259,6 @@ class DucketBucketApp:
         self._setup_column(self.holdings_table, "day_pnl", "Day PnL", 120, anchor=tk.E)
         self.holdings_table.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
 
-        status_frame = ttk.LabelFrame(content_panes, text="Sync Status")
-        content_panes.add(status_frame, weight=1)
-
-        self.status_text = tk.Text(
-            status_frame,
-            height=5,
-            wrap=tk.WORD,
-            background=TABLE_FIELD,
-            foreground=TEXT,
-            insertbackground=TEXT,
-            relief=tk.FLAT,
-        )
-        self.status_text.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
-        self.status_text.insert(tk.END, "Click Sync Bucket to load Schwab, Jeremy, and Alex.\n")
-        self.status_text.configure(state=tk.DISABLED)
-
     def _setup_column(
         self,
         table: ttk.Treeview,
@@ -206,23 +270,21 @@ class DucketBucketApp:
         table.heading(column, text=label)
         table.column(column, width=width, anchor=anchor)
 
-    def _sync_bucket(self) -> None:
+    def _sync(self) -> None:
         if self.sync_button is not None:
             self.sync_button.configure(state=tk.DISABLED)
 
-        self.status.set("Syncing bucket...")
-        self._set_status_text("Syncing Schwab, Jeremy Hyperliquid, and Alex Hyperliquid...\n")
+        self.status_icon.set("…")
 
-        thread = threading.Thread(target=self._sync_bucket_background, daemon=True)
+        thread = threading.Thread(target=self._sync_background, daemon=True)
         thread.start()
 
-    def _sync_bucket_background(self) -> None:
+    def _sync_background(self) -> None:
         try:
-            bucket = DucketBucketSnapshot(
-                snapshots=[sync_schwab_portfolio(), *sync_hyperliquid_portfolios()]
-            )
+            snapshots = self.sync_snapshots()
+            bucket = DucketBucketSnapshot(snapshots=snapshots)
         except Exception as exc:
-            self.root.after(0, lambda: self._show_sync_error(exc))
+            self.root.after(0, lambda: self._show_error(exc))
             return
 
         self.root.after(0, lambda: self._show_bucket(bucket))
@@ -242,12 +304,18 @@ class DucketBucketApp:
         for snapshot in bucket.snapshots:
             self._insert_snapshot(snapshot)
 
-        statuses = "\n".join(snapshot.status for snapshot in bucket.snapshots)
-        self._set_status_text(statuses + "\n")
-        self.status.set("Bucket synced.")
+        self.status_icon.set("✅")
 
         if self.sync_button is not None:
             self.sync_button.configure(state=tk.NORMAL)
+
+    def _show_error(self, exc: Exception) -> None:
+        self.status_icon.set("❌")
+
+        if self.sync_button is not None:
+            self.sync_button.configure(state=tk.NORMAL)
+
+        messagebox.showerror("Sync failed", f"{type(exc).__name__}: {exc}")
 
     def _insert_snapshot(self, snapshot: PortfolioSnapshot) -> None:
         if self.cash_table is None or self.holdings_table is None:
@@ -282,28 +350,12 @@ class DucketBucketApp:
                 ),
             )
 
-    def _show_sync_error(self, exc: Exception) -> None:
-        self.status.set("Sync failed.")
-        self._set_status_text(f"{type(exc).__name__}: {exc}\n")
-
-        if self.sync_button is not None:
-            self.sync_button.configure(state=tk.NORMAL)
-
     def _clear_table(self, table: ttk.Treeview | None) -> None:
         if table is None:
             return
 
         for item_id in table.get_children():
             table.delete(item_id)
-
-    def _set_status_text(self, value: str) -> None:
-        if self.status_text is None:
-            return
-
-        self.status_text.configure(state=tk.NORMAL)
-        self.status_text.delete("1.0", tk.END)
-        self.status_text.insert(tk.END, value)
-        self.status_text.configure(state=tk.DISABLED)
 
 
 def _money(value: float) -> str:
