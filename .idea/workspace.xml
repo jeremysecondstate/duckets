@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Make Ducket Bucket sections resizable">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/ui/ducket_bucket.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ui/ducket_bucket.py" afterDir="false" />
-    </list>
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add Schwab and Hyperliquid Duckets tabs" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -157,7 +154,7 @@
       <updated>1782170828027</updated>
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
-      <workItem from="1782492563563" duration="14869000" />
+      <workItem from="1782492563563" duration="15173000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -311,7 +308,15 @@
       <option name="project" value="LOCAL" />
       <updated>1782624599238</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Add Schwab and Hyperliquid Duckets tabs">
+      <option name="closed" value="true" />
+      <created>1782629486756</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1782629486756</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -335,7 +340,8 @@
     <MESSAGE value="post info for hyperliquid.py modified!" />
     <MESSAGE value="Add dark Ducket Bucket theme" />
     <MESSAGE value="Make Ducket Bucket sections resizable" />
-    <option name="LAST_COMMIT_MESSAGE" value="Make Ducket Bucket sections resizable" />
+    <MESSAGE value="Add Schwab and Hyperliquid Duckets tabs" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add Schwab and Hyperliquid Duckets tabs" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />

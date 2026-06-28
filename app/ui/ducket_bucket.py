@@ -121,41 +121,40 @@ class DucketBucketApp:
         )
 
     def _build_layout(self) -> None:
-        def _build_layout(self) -> None:
-            notebook = ttk.Notebook(self.root)
-            notebook.pack(fill=tk.BOTH, expand=True)
+        notebook = ttk.Notebook(self.root)
+        notebook.pack(fill=tk.BOTH, expand=True)
 
-            bucket_frame = ttk.Frame(notebook)
-            schwab_frame = ttk.Frame(notebook)
-            hyperliquid_frame = ttk.Frame(notebook)
+        bucket_frame = ttk.Frame(notebook)
+        schwab_frame = ttk.Frame(notebook)
+        hyperliquid_frame = ttk.Frame(notebook)
 
-            notebook.add(bucket_frame, text="Ducket Bucket")
-            notebook.add(schwab_frame, text="Schwab Duckets")
-            notebook.add(hyperliquid_frame, text="Hyperliquid Duckets")
+        notebook.add(bucket_frame, text="Ducket Bucket")
+        notebook.add(schwab_frame, text="Schwab Duckets")
+        notebook.add(hyperliquid_frame, text="Hyperliquid Duckets")
 
-            DucketsTab(
-                root=self.root,
-                parent=bucket_frame,
-                title="Ducket Bucket",
-                sync_button_text="Sync Bucket",
-                sync_snapshots=lambda: [sync_schwab_portfolio(), *sync_hyperliquid_portfolios()],
-            )
+        DucketsTab(
+            root=self.root,
+            parent=bucket_frame,
+            title="Ducket Bucket",
+            sync_button_text="Sync Bucket",
+            sync_snapshots=lambda: [sync_schwab_portfolio(), *sync_hyperliquid_portfolios()],
+        )
 
-            DucketsTab(
-                root=self.root,
-                parent=schwab_frame,
-                title="Schwab Duckets",
-                sync_button_text="Sync Schwab",
-                sync_snapshots=lambda: [sync_schwab_portfolio()],
-            )
+        DucketsTab(
+            root=self.root,
+            parent=schwab_frame,
+            title="Schwab Duckets",
+            sync_button_text="Sync Schwab",
+            sync_snapshots=lambda: [sync_schwab_portfolio()],
+        )
 
-            DucketsTab(
-                root=self.root,
-                parent=hyperliquid_frame,
-                title="Hyperliquid Duckets",
-                sync_button_text="Sync Hyperliquid",
-                sync_snapshots=sync_hyperliquid_portfolios,
-            )
+        DucketsTab(
+            root=self.root,
+            parent=hyperliquid_frame,
+            title="Hyperliquid Duckets",
+            sync_button_text="Sync Hyperliquid",
+            sync_snapshots=sync_hyperliquid_portfolios,
+        )
 
 
 class DucketsTab:
