@@ -296,6 +296,8 @@ class DucketsTab:
         self._setup_column(self.holdings_table, "value", "Value", 120, anchor=tk.E)
         self._setup_column(self.holdings_table, "unrealized_pnl", "Unrealized PnL", 140, anchor=tk.E)
         self._setup_column(self.holdings_table, "day_pnl", "Day PnL", 120, anchor=tk.E)
+        self.holdings_table.tag_configure("pnl_positive", foreground=SUCCESS)
+        self.holdings_table.tag_configure("pnl_negative", foreground=DANGER)
         self.holdings_table.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
 
     def _setup_column(
@@ -374,6 +376,8 @@ class DucketsTab:
             )
 
         for holding in snapshot.holdings:
+            pnl_tag = _pnl_row_tag(holding.unrealized_pnl, holding.day_pnl)
+
             self.holdings_table.insert(
                 "",
                 tk.END,
@@ -387,6 +391,7 @@ class DucketsTab:
                     _money_or_dash(holding.unrealized_pnl),
                     _money_or_dash(holding.day_pnl),
                 ),
+                tags=pnl_tag,
             )
 
     def _clear_table(self, table: ttk.Treeview | None) -> None:
@@ -900,6 +905,19 @@ class SchwabDucketsTab(DucketsTab):
         self.option_bid.set(str(values[4]))
         self.option_ask.set(str(values[5]))
         self.option_mark.set(str(values[6]))
+
+
+def _pnl_row_tag(*values: float | None) -> tuple[str, ...]:
+    has_negative = any(value is not None and value < 0 for value in values)
+    has_positive = any(value is not None and value > 0 for value in values)
+
+    if has_negative and not has_positive:
+        return ("pnl_negative",)
+
+    if has_positive and not has_negative:
+        return ("pnl_positive",)
+
+    return ()
 
 
 def _first_order_leg(order: dict[str, object]) -> dict[str, object]:
