@@ -432,46 +432,90 @@ class SchwabDucketsTab(DucketsTab):
         self._build_option_chain_panel(right_frame)
 
     def _build_ticket_panel(self, parent: ttk.Frame) -> None:
-        stock_frame = ttk.LabelFrame(parent, text="Stock / ETF Ticket")
-        stock_frame.pack(fill=tk.X, pady=(0, 10))
+        ticket_frame = ttk.LabelFrame(parent, text="Schwab Stock / ETF Ticket")
+        ticket_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+
+        ticket_columns = ttk.PanedWindow(ticket_frame, orient=tk.HORIZONTAL)
+        ticket_columns.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+
+        stock_frame = ttk.LabelFrame(ticket_columns, text="Stock / ETF Ticket")
+        option_frame = ttk.LabelFrame(ticket_columns, text="Options Ticket Fields")
+
+        ticket_columns.add(stock_frame, weight=1)
+        ticket_columns.add(option_frame, weight=1)
 
         self._entry_row(stock_frame, "Symbol", self.stock_symbol, 0, 0)
-
         self._combo_row(stock_frame, "Side", self.stock_side, SCHWAB_EQUITY_SIDE_CHOICES, 0, 2)
-        self._combo_row(stock_frame, "Order Type", self.stock_order_type, SCHWAB_EQUITY_ORDER_TYPE_CHOICES, 1, 0)
+
+        self._combo_row(
+            stock_frame,
+            "Order Type",
+            self.stock_order_type,
+            SCHWAB_EQUITY_ORDER_TYPE_CHOICES,
+            1,
+            0,
+        )
         self._combo_row(stock_frame, "TIF", self.stock_tif, SCHWAB_EQUITY_TIME_IN_FORCE_CHOICES, 1, 2)
 
-        self._entry_row(stock_frame, "Quantity", self.stock_quantity, 1, 2)
-        self._entry_row(stock_frame, "Limit Price", self.stock_price, 2, 0)
+        self._combo_row(
+            stock_frame,
+            "Position Effect",
+            self.stock_position_effect,
+            ("AUTO", "OPENING", "CLOSING"),
+            2,
+            0,
+        )
+        self._entry_row(stock_frame, "Quantity", self.stock_quantity, 2, 2)
 
-        ttk.Button(stock_frame, text="Submit Stock / ETF Order", command=self._submit_stock_order).grid(
-            row=3,
+        self._entry_row(stock_frame, "Entry / Limit", self.stock_entry_limit, 3, 0)
+        self._entry_row(stock_frame, "Stop Price", self.stock_stop_price, 3, 2)
+
+        ttk.Button(stock_frame, text="Use Mid", command=self._use_stock_mid).grid(
+            row=4,
             column=0,
-            columnspan=4,
+            columnspan=2,
             sticky="ew",
             padx=8,
             pady=8,
         )
 
-        option_frame = ttk.LabelFrame(parent, text="Option Ticket")
-        option_frame.pack(fill=tk.X, pady=(0, 10))
-
-        self._entry_row(option_frame, "Option Symbol", self.option_symbol, 0, 0)
-        self._combo_row(
-            option_frame,
-            "Side",
-            self.option_side,
-            ("BUY_TO_OPEN", "SELL_TO_CLOSE", "SELL_TO_OPEN", "BUY_TO_CLOSE"),
-            0,
-            2,
+        ttk.Button(stock_frame, text="Submit Stock / ETF Order", command=self._submit_stock_order).grid(
+            row=4,
+            column=2,
+            columnspan=2,
+            sticky="ew",
+            padx=8,
+            pady=8,
         )
-        self._combo_row(option_frame, "Order Type", self.option_order_type, SCHWAB_EQUITY_ORDER_TYPE_CHOICES, 1, 0)
-        self._combo_row(option_frame, "TIF", self.option_tif, SCHWAB_EQUITY_TIME_IN_FORCE_CHOICES, 1, 2)
-        self._entry_row(option_frame, "Quantity", self.option_quantity, 1, 2)
-        self._entry_row(option_frame, "Limit Price", self.option_price, 2, 0)
+
+        self._combo_row(option_frame, "Strategy", self.option_strategy, ("SINGLE", "VERTICAL"), 0, 0)
+        self._entry_row(option_frame, "Contracts", self.option_contracts, 0, 2)
+
+        self._entry_row(option_frame, "Expiration", self.option_expiration, 1, 0)
+        self._entry_row(option_frame, "Strike", self.option_strike, 1, 2)
+
+        self._combo_row(option_frame, "Call / Put", self.option_call_put, ("CALL", "PUT"), 2, 0)
+        self._entry_row(option_frame, "Bid", self.option_bid, 2, 2)
+
+        self._entry_row(option_frame, "Ask", self.option_ask, 3, 0)
+        self._entry_row(option_frame, "Mark", self.option_mark, 3, 2)
+
+        self._entry_row(option_frame, "Limit / Debit", self.option_limit_debit, 4, 0)
+
+        ttk.Button(option_frame, text="Use Mid", command=self._use_option_mid).grid(
+            row=4,
+            column=2,
+            sticky="ew",
+            padx=8,
+            pady=8,
+        )
+
+        self._entry_row(option_frame, "Short Strike", self.option_short_strike, 5, 2)
+        self._entry_row(option_frame, "Credit", self.option_credit, 6, 0)
+        self._entry_row(option_frame, "Target Price", self.option_target_price, 6, 2)
 
         ttk.Button(option_frame, text="Submit Option Order", command=self._submit_option_order).grid(
-            row=3,
+            row=7,
             column=0,
             columnspan=4,
             sticky="ew",
@@ -482,7 +526,8 @@ class SchwabDucketsTab(DucketsTab):
         cancel_frame = ttk.LabelFrame(parent, text="Cancel Order")
         cancel_frame.pack(fill=tk.X)
 
-        self._entry_row(cancel_frame, "Order ID", self.order_id, 0, 0)
+        self._entry_row(cancel_frame, "Cancel Order ID", self.order_id, 0, 0)
+
         ttk.Button(cancel_frame, text="Cancel Order", command=self._cancel_order).grid(
             row=1,
             column=0,
@@ -638,6 +683,23 @@ class SchwabDucketsTab(DucketsTab):
         except Exception as exc:
             messagebox.showerror("Option order failed", f"{type(exc).__name__}: {exc}")
 
+    def _use_stock_mid(self) -> None:
+        self.stock_order_type.set("LIMIT")
+
+    def _use_option_mid(self) -> None:
+        mark = self.option_mark.get().strip()
+        if mark:
+            self.option_limit_debit.set(mark)
+            return
+
+        bid = _to_float(self.option_bid.get())
+        ask = _to_float(self.option_ask.get())
+
+        if bid is None or ask is None:
+            return
+
+        self.option_limit_debit.set(f"{((bid + ask) / 2):.2f}")
+
     def _stock_order_payload(self) -> dict[str, object]:
         symbol = self.stock_symbol.get().strip().upper()
         quantity = int(self.stock_quantity.get().strip())
@@ -772,6 +834,12 @@ class SchwabDucketsTab(DucketsTab):
             return
 
         self.option_symbol.set(str(values[0]))
+        self.option_expiration.set(str(values[1]))
+        self.option_strike.set(str(values[2]))
+        self.option_call_put.set(str(values[3]))
+        self.option_bid.set(str(values[4]))
+        self.option_ask.set(str(values[5]))
+        self.option_mark.set(str(values[6]))
 
 
 def _first_order_leg(order: dict[str, object]) -> dict[str, object]:
@@ -832,6 +900,16 @@ def _option_chain_rows(chain: object) -> list[dict[str, object]]:
                     )
 
     return rows
+
+
+def _to_float(value: object) -> float | None:
+    if value is None or value == "":
+        return None
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _money(value: float) -> str:
