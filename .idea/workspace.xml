@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Improve Schwab ticket field usability: Style TEntry and TCombobox fields, add holdings table selection handler in Ducket Bucket">
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add PnL-based row styling to Ducket Bucket holdings table: Highlight positive and negative PnL rows with specific tags">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/schwab.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/schwab.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/ui/ducket_bucket.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ui/ducket_bucket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -45,23 +46,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0813338659651208" />
-      <entry key="MS500" value="1.605416541975277" />
-      <entry key="S2" value="1.8820913651971765" />
-      <entry key="S5" value="1.9510545514610969" />
-      <entry key="S10" value="1.9752202579218179" />
-      <entry key="S30" value="1.9916709047533847" />
-      <entry key="S60" value="1.9958267443453126" />
-      <entry key="M2" value="1.9979111906103233" />
-      <entry key="M5" value="1.9991639520850972" />
-      <entry key="M10" value="1.9995819518320723" />
-      <entry key="M15" value="1.9997710802885555" />
-      <entry key="M30" value="2.0391675682096615" />
-      <entry key="H1" value="3.1038014544510433" />
-      <entry key="H2" value="7.863501530232514" />
-      <entry key="H4" value="16.02813530159353" />
-      <entry key="D1" value="59.39105783689072" />
-      <entry key="W1" value="111.15672938444388" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0" />
+      <entry key="M5" value="1.0" />
+      <entry key="M10" value="1.0" />
+      <entry key="M15" value="1.0" />
+      <entry key="M30" value="1.000000000954038" />
+      <entry key="H1" value="1.000067135206237" />
+      <entry key="H2" value="1.036571617863505" />
+      <entry key="H4" value="2.093067794376661" />
+      <entry key="D1" value="38.96194105757954" />
+      <entry key="W1" value="105.27212838802562" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -69,37 +70,37 @@
       <entry key="S2" value="0.0" />
       <entry key="S5" value="0.0" />
       <entry key="S10" value="0.0" />
-      <entry key="S30" value="2.231018262418813E-165" />
-      <entry key="S60" value="4.723365603485309E-83" />
-      <entry key="M2" value="6.872674591078286E-42" />
-      <entry key="M5" value="3.4264966576922473E-17" />
-      <entry key="M10" value="5.8536284966610645E-9" />
-      <entry key="M15" value="3.248005611152139E-6" />
-      <entry key="M30" value="0.0018022224157722344" />
-      <entry key="H1" value="0.042455471417581304" />
-      <entry key="H2" value="0.2081794158935296" />
-      <entry key="H4" value="0.5179566475325986" />
-      <entry key="D1" value="2.5542683075045605" />
-      <entry key="W1" value="4.4888897414344395" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="7.741366592526926E-182" />
+      <entry key="M5" value="3.5935778159855295E-73" />
+      <entry key="M10" value="5.994645791025129E-37" />
+      <entry key="M15" value="7.109553901512091E-25" />
+      <entry key="M30" value="8.431817096989655E-13" />
+      <entry key="H1" value="9.183115838230883E-7" />
+      <entry key="H2" value="9.682020173627051E-4" />
+      <entry key="H4" value="0.0353229942003858" />
+      <entry key="D1" value="1.6326529020754674" />
+      <entry key="W1" value="4.210865955039945" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0060458856173466" />
-      <entry key="MS500" value="1.569160882219298" />
-      <entry key="S2" value="1.8701558882999418" />
-      <entry key="S5" value="1.9459918594087822" />
-      <entry key="S10" value="1.9726382725257445" />
-      <entry key="S30" value="1.9907987433483991" />
-      <entry key="S60" value="1.9953892105438622" />
-      <entry key="M2" value="1.997692059251853" />
-      <entry key="M5" value="1.9990762119200298" />
-      <entry key="M10" value="1.9995380729665175" />
-      <entry key="M15" value="1.9997450605905605" />
-      <entry key="M30" value="2.040952763610091" />
-      <entry key="H1" value="3.1462200254071013" />
-      <entry key="H2" value="8.07160295456779" />
-      <entry key="H4" value="16.545995703505017" />
-      <entry key="D1" value="61.9452440917423" />
-      <entry key="W1" value="115.64559898156571" />
+      <entry key="MS100" value="2.1310560952610377E-6" />
+      <entry key="MS500" value="0.07340387320085331" />
+      <entry key="S2" value="0.5205107988420558" />
+      <entry key="S5" value="0.7701439314549967" />
+      <entry key="S10" value="0.8775784474649527" />
+      <entry key="S30" value="0.9574041733966575" />
+      <entry key="S60" value="0.9784703232069215" />
+      <entry key="M2" value="0.9891765884850497" />
+      <entry key="M5" value="0.9956564961232249" />
+      <entry key="M10" value="0.9978258846728847" />
+      <entry key="M15" value="0.9985500640762991" />
+      <entry key="M30" value="0.9992747700130633" />
+      <entry key="H1" value="0.9997053714799183" />
+      <entry key="H2" value="1.0373581000922174" />
+      <entry key="H4" value="2.128293542287927" />
+      <entry key="D1" value="40.594526398391274" />
+      <entry key="W1" value="109.48297328720457" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -161,7 +162,7 @@
       <updated>1782170828027</updated>
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
-      <workItem from="1782492563563" duration="31753000" />
+      <workItem from="1782492563563" duration="36957000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -395,15 +396,21 @@
       <option name="project" value="LOCAL" />
       <updated>1782711329270</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="Add PnL-based row styling to Ducket Bucket holdings table: Highlight positive and negative PnL rows with specific tags">
+      <option name="closed" value="true" />
+      <created>1782713817249</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1782713817249</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="added and labeled spot and perp balances!" />
-    <MESSAGE value="authorize Schwab and persist the token locally" />
     <MESSAGE value="Add Schwab portfolio sync" />
     <MESSAGE value="Use DucketBucketSnapshot for combined totals" />
     <MESSAGE value="latest changes" />
@@ -427,7 +434,9 @@
     <MESSAGE value="Remove redundant Schwab ticket field initializations" />
     <MESSAGE value="Show expanded Schwab ticket fields: Redesign and expand Schwab ticket panels with improved layout and additional fields" />
     <MESSAGE value="Improve Schwab ticket field usability: Style TEntry and TCombobox fields, add holdings table selection handler in Ducket Bucket" />
-    <option name="LAST_COMMIT_MESSAGE" value="Improve Schwab ticket field usability: Style TEntry and TCombobox fields, add holdings table selection handler in Ducket Bucket" />
+    <MESSAGE value="Add PnL-based row styling to Ducket Bucket holdings table: Highlight positive and negative PnL rows with specific tags" />
+    <MESSAGE value="Add equity quote/midprice methods and improve order validation/confirmation logic" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add equity quote/midprice methods and improve order validation/confirmation logic" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />

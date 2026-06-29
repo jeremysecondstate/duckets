@@ -714,7 +714,20 @@ class SchwabDucketsTab(DucketsTab):
     def _submit_stock_order(self) -> None:
         try:
             payload = self._stock_order_payload()
+
+            if not messagebox.askyesno(
+                "Confirm Stock / ETF Order",
+                (
+                    f"Submit {payload['orderType']} "
+                    f"{self.stock_side.get().strip().upper()} "
+                    f"{self.stock_quantity.get().strip()} "
+                    f"{self.stock_symbol.get().strip().upper()}?"
+                ),
+            ):
+                return
+
             location = SchwabSession().submit_order(payload)
+            self._load_open_orders()
             messagebox.showinfo("Stock / ETF order submitted", f"Location: {location}")
         except Exception as exc:
             messagebox.showerror("Stock / ETF order failed", f"{type(exc).__name__}: {exc}")
@@ -722,13 +735,39 @@ class SchwabDucketsTab(DucketsTab):
     def _submit_option_order(self) -> None:
         try:
             payload = self._option_order_payload()
+
+            if not messagebox.askyesno(
+                "Confirm Option Order",
+                (
+                    f"Submit {payload['orderType']} "
+                    f"{self.option_side.get().strip().upper()} "
+                    f"{self.option_contracts.get().strip()} contract(s) "
+                    f"{self.option_symbol.get().strip().upper()}?"
+                ),
+            ):
+                return
+
             location = SchwabSession().submit_order(payload)
+            self._load_open_orders()
             messagebox.showinfo("Option order submitted", f"Location: {location}")
         except Exception as exc:
             messagebox.showerror("Option order failed", f"{type(exc).__name__}: {exc}")
 
     def _use_stock_mid(self) -> None:
+        symbol = self.stock_symbol.get().strip().upper()
+        if not symbol:
+            messagebox.showwarning("Use mid", "Stock / ETF symbol is required.")
+            return
+
+        try:
+            mid = SchwabSession().get_equity_mid(symbol)
+        except Exception as exc:
+            messagebox.showerror("Stock quote failed", f"{type(exc).__name__}: {exc}")
+            return
+
+        self.stock_symbol.set(symbol)
         self.stock_order_type.set("LIMIT")
+        self.stock_entry_limit.set(f"{mid:.2f}")
 
     def _use_option_mid(self) -> None:
         mark = self.option_mark.get().strip()
@@ -767,7 +806,7 @@ class SchwabDucketsTab(DucketsTab):
 
     def _stock_order_payload(self) -> dict[str, object]:
         symbol = self.stock_symbol.get().strip().upper()
-        quantity = int(self.stock_quantity.get().strip())
+        quantity = _positive_int(self.stock_quantity.get(), "Quantity")
         order_type = self.stock_order_type.get().strip().upper()
         side = self.stock_side.get().strip().upper()
         session, duration = schwab_equity_session_duration(self.stock_tif.get())
@@ -796,19 +835,23 @@ class SchwabDucketsTab(DucketsTab):
         }
 
         if order_type in {"LIMIT", "STOP_LIMIT"}:
-            payload["price"] = self.stock_entry_limit.get().strip()
+            payload["price"] = _required_positive_price(self.stock_entry_limit.get(), "Entry / Limit")
 
         if order_type in {"STOP", "STOP_LIMIT"}:
-            payload["stopPrice"] = self.stock_stop_price.get().strip()
+            payload["stopPrice"] = _required_positive_price(self.stock_stop_price.get(), "Stop Price")
 
         return payload
 
     def _option_order_payload(self) -> dict[str, object]:
         symbol = self.option_symbol.get().strip().upper()
-        quantity = int(self.option_contracts.get().strip())
+        quantity = _positive_int(self.option_contracts.get(), "Contracts")
         order_type = self.option_order_type.get().strip().upper()
         side = self.option_side.get().strip().upper()
         session, duration = schwab_equity_session_duration(self.option_tif.get())
+
+        strategy = self.option_strategy.get().strip().upper()
+        if strategy != "SINGLE":
+            raise ValueError("Only SINGLE option orders are wired up right now.")
 
         if not symbol:
             raise ValueError("Option symbol is required.")
@@ -833,7 +876,7 @@ class SchwabDucketsTab(DucketsTab):
         price = self.option_limit_debit.get().strip() or self.option_credit.get().strip()
 
         if order_type in {"LIMIT", "STOP_LIMIT"}:
-            payload["price"] = price
+            payload["price"] = _required_positive_price(price, "Limit / Debit or Credit")
 
         return payload
 
@@ -978,6 +1021,27 @@ def _option_chain_rows(chain: object) -> list[dict[str, object]]:
                     )
 
     return rows
+
+
+def _positive_int(value: object, label: str) -> int:
+    try:
+        number = int(str(value).strip())
+    except ValueError:
+        raise ValueError(f"{label} must be a whole number.") from None
+
+    if number <= 0:
+        raise ValueError(f"{label} must be greater than zero.")
+
+    return number
+
+
+def _required_positive_price(value: object, label: str) -> str:
+    number = _to_float(value)
+
+    if number is None or number <= 0:
+        raise ValueError(f"{label} must be a positive number.")
+
+    return f"{number:.2f}"
 
 
 def _to_float(value: object) -> float | None:

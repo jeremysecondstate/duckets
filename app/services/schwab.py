@@ -216,6 +216,59 @@ class SchwabSession:
         response.raise_for_status()
         return response.json()
 
+    def get_equity_quote(self, symbol: str) -> dict[str, Any]:
+        cleaned_symbol = symbol.strip().upper()
+        if not cleaned_symbol:
+            raise ValueError("Stock / ETF symbol is required for quote.")
+
+        response = requests.get(
+            f"{MARKETDATA_BASE_URL}/quotes",
+            headers=self._headers(),
+            params={
+                "symbols": cleaned_symbol,
+                "fields": "quote",
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+
+        payload = response.json()
+        if not isinstance(payload, dict):
+            raise RuntimeError("Unexpected Schwab quote response.")
+
+        row = payload.get(cleaned_symbol)
+
+        if not isinstance(row, dict):
+            row = next((value for value in payload.values() if isinstance(value, dict)), None)
+
+        if not isinstance(row, dict):
+            raise RuntimeError(f"No quote returned for {cleaned_symbol}.")
+
+        quote = row.get("quote")
+        return quote if isinstance(quote, dict) else row
+
+    def get_equity_mid(self, symbol: str) -> float:
+        cleaned_symbol = symbol.strip().upper()
+        quote = self.get_equity_quote(cleaned_symbol)
+
+        bid = _first_number(quote, ("bidPrice", "bid"))
+        ask = _first_number(quote, ("askPrice", "ask"))
+        mark = _first_number(quote, ("mark", "markPrice"))
+        last = _first_number(quote, ("lastPrice", "last"))
+
+        if bid is not None and ask is not None and bid > 0 and ask > 0:
+            return round((bid + ask) / 2, 2)
+
+        if mark is not None and mark > 0:
+            return round(mark, 2)
+
+        if last is not None and last > 0:
+            return round(last, 2)
+
+        raise RuntimeError(
+            f"Quote for {cleaned_symbol} did not include a usable bid/ask, mark, or last price."
+        )
+
     def cancel_order(self, order_id: str) -> object:
         cleaned_order_id = str(order_id).strip()
         if not cleaned_order_id:
