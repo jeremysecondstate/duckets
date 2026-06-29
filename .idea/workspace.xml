@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Make Schwab order actions vertically resizable">
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Use Schwab ticket field mappings">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/ui/ducket_bucket.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ui/ducket_bucket.py" afterDir="false" />
     </list>
@@ -41,61 +41,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="7.350896446659732E-135" />
-      <entry key="S5" value="8.664835061786996E-54" />
-      <entry key="S10" value="1.3012886104167705E-26" />
-      <entry key="S30" value="2.1923508036803215E-8" />
-      <entry key="S60" value="8.18733042790084E-4" />
-      <entry key="M2" value="0.15904552628208102" />
-      <entry key="M5" value="3.7605631417802106" />
-      <entry key="M10" value="10.796394225384123" />
-      <entry key="M15" value="15.344994106884247" />
-      <entry key="M30" value="21.810270419154527" />
-      <entry key="H1" value="26.002445278213234" />
-      <entry key="H2" value="28.458206582849662" />
-      <entry key="H4" value="30.90469324982916" />
-      <entry key="D1" value="65.46586497074998" />
-      <entry key="W1" value="111.22892841189321" />
+      <entry key="MS100" value="1.0813338659651208" />
+      <entry key="MS500" value="1.605416541975277" />
+      <entry key="S2" value="1.8820913651971765" />
+      <entry key="S5" value="1.9510545514610969" />
+      <entry key="S10" value="1.9752202579218179" />
+      <entry key="S30" value="1.9916709047533847" />
+      <entry key="S60" value="1.9958267443453126" />
+      <entry key="M2" value="1.9979111906103233" />
+      <entry key="M5" value="1.9991639520850972" />
+      <entry key="M10" value="1.9995819518320723" />
+      <entry key="M15" value="1.9997710802885555" />
+      <entry key="M30" value="2.0391675682096615" />
+      <entry key="H1" value="3.1038014544510433" />
+      <entry key="H2" value="7.863501530232514" />
+      <entry key="H4" value="16.02813530159353" />
+      <entry key="D1" value="59.39105783689072" />
+      <entry key="W1" value="111.15672938444388" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0" />
-      <entry key="S60" value="1.0" />
-      <entry key="M2" value="1.0" />
-      <entry key="M5" value="1.0" />
-      <entry key="M10" value="1.0" />
-      <entry key="M15" value="1.0" />
-      <entry key="M30" value="1.0000000038115342" />
-      <entry key="H1" value="1.000067870669859" />
-      <entry key="H2" value="1.0103822062880756" />
-      <entry key="H4" value="1.1410833358400603" />
-      <entry key="D1" value="2.913648605880697" />
-      <entry key="W1" value="4.574105477663249" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="2.231018262418813E-165" />
+      <entry key="S60" value="4.723365603485309E-83" />
+      <entry key="M2" value="6.872674591078286E-42" />
+      <entry key="M5" value="3.4264966576922473E-17" />
+      <entry key="M10" value="5.8536284966610645E-9" />
+      <entry key="M15" value="3.248005611152139E-6" />
+      <entry key="M30" value="0.0018022224157722344" />
+      <entry key="H1" value="0.042455471417581304" />
+      <entry key="H2" value="0.2081794158935296" />
+      <entry key="H4" value="0.5179566475325986" />
+      <entry key="D1" value="2.5542683075045605" />
+      <entry key="W1" value="4.4888897414344395" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.586035165866257E-8" />
-      <entry key="MS500" value="0.027546254934599064" />
-      <entry key="S2" value="0.4073949494014435" />
-      <entry key="S5" value="0.69824246256508" />
-      <entry key="S10" value="0.8356090369096543" />
-      <entry key="S30" value="0.9418918798366166" />
-      <entry key="S60" value="0.9713295161254542" />
-      <entry key="M2" value="1.14415559193464" />
-      <entry key="M5" value="4.754254952020136" />
-      <entry key="M10" value="11.792914678090487" />
-      <entry key="M15" value="16.342534527434555" />
-      <entry key="M30" value="22.80894121234489" />
-      <entry key="H1" value="27.00181626998556" />
-      <entry key="H2" value="29.468228017986434" />
-      <entry key="H4" value="32.045568581573626" />
-      <entry key="D1" value="68.37942032708642" />
-      <entry key="W1" value="115.80301340720793" />
+      <entry key="MS100" value="1.0060458856173466" />
+      <entry key="MS500" value="1.569160882219298" />
+      <entry key="S2" value="1.8701558882999418" />
+      <entry key="S5" value="1.9459918594087822" />
+      <entry key="S10" value="1.9726382725257445" />
+      <entry key="S30" value="1.9907987433483991" />
+      <entry key="S60" value="1.9953892105438622" />
+      <entry key="M2" value="1.997692059251853" />
+      <entry key="M5" value="1.9990762119200298" />
+      <entry key="M10" value="1.9995380729665175" />
+      <entry key="M15" value="1.9997450605905605" />
+      <entry key="M30" value="2.040952763610091" />
+      <entry key="H1" value="3.1462200254071013" />
+      <entry key="H2" value="8.07160295456779" />
+      <entry key="H4" value="16.545995703505017" />
+      <entry key="D1" value="61.9452440917423" />
+      <entry key="W1" value="115.64559898156571" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -157,7 +157,7 @@
       <updated>1782170828027</updated>
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
-      <workItem from="1782492563563" duration="25574000" />
+      <workItem from="1782492563563" duration="26911000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -359,7 +359,15 @@
       <option name="project" value="LOCAL" />
       <updated>1782691438878</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="Use Schwab ticket field mappings">
+      <option name="closed" value="true" />
+      <created>1782704330602</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1782704330602</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -389,7 +397,8 @@
     <MESSAGE value="import changes to schwab.py and adding schwab, hyperliquid, and databento API docs in a folder called 'docs'" />
     <MESSAGE value="Add Schwab Duckets order panels" />
     <MESSAGE value="Make Schwab order actions vertically resizable" />
-    <option name="LAST_COMMIT_MESSAGE" value="Make Schwab order actions vertically resizable" />
+    <MESSAGE value="Use Schwab ticket field mappings" />
+    <option name="LAST_COMMIT_MESSAGE" value="Use Schwab ticket field mappings" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />

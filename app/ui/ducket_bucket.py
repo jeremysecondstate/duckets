@@ -364,22 +364,6 @@ class DucketsTab:
 class SchwabDucketsTab(DucketsTab):
     def __init__(self, root: tk.Tk, parent: ttk.Frame) -> None:
         self.order_id = tk.StringVar()
-        self.chain_symbol = tk.StringVar()
-        self.chain_strikes = tk.StringVar(value="10")
-
-        self.stock_symbol = tk.StringVar()
-        self.stock_side = tk.StringVar(value="BUY")
-        self.stock_order_type = tk.StringVar(value="LIMIT")
-        self.stock_quantity = tk.StringVar()
-        self.stock_price = tk.StringVar()
-
-        self.option_symbol = tk.StringVar()
-        self.option_side = tk.StringVar(value="BUY_TO_OPEN")
-        self.option_order_type = tk.StringVar(value="LIMIT")
-        self.option_quantity = tk.StringVar()
-        self.option_price = tk.StringVar()
-
-        self.order_id = tk.StringVar()
 
         self.chain_symbol = tk.StringVar()
         self.chain_strikes = tk.StringVar(value="10")
