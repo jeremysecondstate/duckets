@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add PnL-based row styling to Ducket Bucket holdings table: Highlight positive and negative PnL rows with specific tags">
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add equity quote fetching and mid-price calculation methods, improve order form validation, and add stock/option order submission confirmation">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/schwab.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/schwab.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/ui/ducket_bucket.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ui/ducket_bucket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -162,7 +161,7 @@
       <updated>1782170828027</updated>
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
-      <workItem from="1782492563563" duration="36957000" />
+      <workItem from="1782492563563" duration="39667000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -404,15 +403,21 @@
       <option name="project" value="LOCAL" />
       <updated>1782713817249</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="Add equity quote fetching and mid-price calculation methods, improve order form validation, and add stock/option order submission confirmation">
+      <option name="closed" value="true" />
+      <created>1782763543326</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1782763543326</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add Schwab portfolio sync" />
-    <MESSAGE value="Use DucketBucketSnapshot for combined totals" />
     <MESSAGE value="latest changes" />
     <MESSAGE value="finishing up the PnL additions!!" />
     <MESSAGE value="changes to main.py!" />
@@ -436,7 +441,9 @@
     <MESSAGE value="Improve Schwab ticket field usability: Style TEntry and TCombobox fields, add holdings table selection handler in Ducket Bucket" />
     <MESSAGE value="Add PnL-based row styling to Ducket Bucket holdings table: Highlight positive and negative PnL rows with specific tags" />
     <MESSAGE value="Add equity quote/midprice methods and improve order validation/confirmation logic" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add equity quote/midprice methods and improve order validation/confirmation logic" />
+    <MESSAGE value="Add equity quote and mid-price methods, improve order submission confirmations and validations" />
+    <MESSAGE value="Add equity quote fetching and mid-price calculation methods, improve order form validation, and add stock/option order submission confirmation" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add equity quote fetching and mid-price calculation methods, improve order form validation, and add stock/option order submission confirmation" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />

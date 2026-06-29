@@ -717,18 +717,16 @@ class SchwabDucketsTab(DucketsTab):
 
             if not messagebox.askyesno(
                 "Confirm Stock / ETF Order",
-                (
-                    f"Submit {payload['orderType']} "
-                    f"{self.stock_side.get().strip().upper()} "
-                    f"{self.stock_quantity.get().strip()} "
-                    f"{self.stock_symbol.get().strip().upper()}?"
-                ),
+                _order_confirmation_message(payload),
             ):
                 return
 
             location = SchwabSession().submit_order(payload)
             self._load_open_orders()
-            messagebox.showinfo("Stock / ETF order submitted", f"Location: {location}")
+            messagebox.showinfo(
+                "Stock / ETF order submitted",
+                _order_submitted_message(payload, location),
+            )
         except Exception as exc:
             messagebox.showerror("Stock / ETF order failed", f"{type(exc).__name__}: {exc}")
 
@@ -738,18 +736,16 @@ class SchwabDucketsTab(DucketsTab):
 
             if not messagebox.askyesno(
                 "Confirm Option Order",
-                (
-                    f"Submit {payload['orderType']} "
-                    f"{self.option_side.get().strip().upper()} "
-                    f"{self.option_contracts.get().strip()} contract(s) "
-                    f"{self.option_symbol.get().strip().upper()}?"
-                ),
+                _order_confirmation_message(payload),
             ):
                 return
 
             location = SchwabSession().submit_order(payload)
             self._load_open_orders()
-            messagebox.showinfo("Option order submitted", f"Location: {location}")
+            messagebox.showinfo(
+                "Option order submitted",
+                _order_submitted_message(payload, location),
+            )
         except Exception as exc:
             messagebox.showerror("Option order failed", f"{type(exc).__name__}: {exc}")
 
@@ -961,6 +957,119 @@ def _pnl_row_tag(*values: float | None) -> tuple[str, ...]:
         return ("pnl_positive",)
 
     return ()
+
+
+def _order_confirmation_message(payload: dict[str, object]) -> str:
+    return "\n".join(
+        [
+            "Review this LIVE Schwab order before submitting:",
+            "",
+            *_order_summary_lines(payload),
+            "",
+            "Submit this order?",
+        ]
+    )
+
+
+def _order_submitted_message(payload: dict[str, object], location: str | None) -> str:
+    order_id = _order_id_from_location(location)
+
+    return "\n".join(
+        [
+            "Schwab accepted the order.",
+            "",
+            f"Order ID: {order_id}",
+            "",
+            *_order_summary_lines(payload),
+            "",
+            f"Location: {location or '--'}",
+        ]
+    )
+
+
+def _order_summary_lines(payload: dict[str, object]) -> list[str]:
+    lines = [
+        f"Order type: {payload.get('orderType') or '--'}",
+        f"Session: {payload.get('session') or '--'}",
+        f"Duration: {payload.get('duration') or '--'}",
+    ]
+
+    price = payload.get("price")
+    stop_price = payload.get("stopPrice")
+
+    if price:
+        lines.append(f"Limit price: ${price}")
+
+    if stop_price:
+        lines.append(f"Stop price: ${stop_price}")
+
+    estimated_value = _estimated_order_value(payload)
+    if estimated_value:
+        lines.append(f"Estimated value: {estimated_value}")
+
+    lines.append("")
+    lines.append("Legs:")
+
+    legs = payload.get("orderLegCollection")
+    if not isinstance(legs, list) or not legs:
+        lines.append("- --")
+        return lines
+
+    for leg in legs:
+        if not isinstance(leg, dict):
+            continue
+
+        instrument = leg.get("instrument")
+        instrument = instrument if isinstance(instrument, dict) else {}
+
+        instruction = str(leg.get("instruction") or "--")
+        quantity = str(leg.get("quantity") or "--")
+        symbol = str(instrument.get("symbol") or "--")
+        asset_type = str(instrument.get("assetType") or "--")
+
+        unit = "contract(s)" if asset_type == "OPTION" else "share(s)"
+        lines.append(f"- {instruction} {quantity} {unit} {symbol} [{asset_type}]")
+
+    return lines
+
+
+def _estimated_order_value(payload: dict[str, object]) -> str:
+    price = _to_float(payload.get("price"))
+    if price is None:
+        return ""
+
+    legs = payload.get("orderLegCollection")
+    if not isinstance(legs, list):
+        return ""
+
+    total = 0.0
+
+    for leg in legs:
+        if not isinstance(leg, dict):
+            continue
+
+        quantity = _to_float(leg.get("quantity"))
+        if quantity is None:
+            continue
+
+        instrument = leg.get("instrument")
+        instrument = instrument if isinstance(instrument, dict) else {}
+        asset_type = str(instrument.get("assetType") or "")
+
+        multiplier = 100 if asset_type == "OPTION" else 1
+        total += quantity * price * multiplier
+
+    if total <= 0:
+        return ""
+
+    return f"~${total:,.2f}"
+
+
+def _order_id_from_location(location: str | None) -> str:
+    if not location:
+        return "--"
+
+    return str(location).rstrip("/").rsplit("/", 1)[-1]
 
 
 def _first_order_leg(order: dict[str, object]) -> dict[str, object]:
