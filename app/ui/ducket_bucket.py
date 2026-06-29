@@ -9,6 +9,13 @@ from app.models.portfolio import PortfolioSnapshot
 from app.services.aggregate import DucketBucketSnapshot
 from app.services.hyperliquid import sync_hyperliquid_portfolios
 from app.services.schwab import sync_schwab_portfolio, SchwabSession
+from app.services.schwab_order_fields import (
+    SCHWAB_EQUITY_ORDER_TYPE_CHOICES,
+    SCHWAB_EQUITY_SIDE_CHOICES,
+    SCHWAB_EQUITY_TIME_IN_FORCE_CHOICES,
+    schwab_equity_session_duration,
+    schwab_equity_tif_requires_limit_order,
+)
 
 BACKGROUND = "#0b1220"
 SURFACE = "#111827"
@@ -372,6 +379,37 @@ class SchwabDucketsTab(DucketsTab):
         self.option_quantity = tk.StringVar()
         self.option_price = tk.StringVar()
 
+        self.order_id = tk.StringVar()
+
+        self.chain_symbol = tk.StringVar()
+        self.chain_strikes = tk.StringVar(value="10")
+
+        self.stock_symbol = tk.StringVar()
+        self.stock_side = tk.StringVar(value="BUY")
+        self.stock_order_type = tk.StringVar(value="LIMIT")
+        self.stock_tif = tk.StringVar(value="DAY")
+        self.stock_position_effect = tk.StringVar(value="AUTO")
+        self.stock_quantity = tk.StringVar()
+        self.stock_entry_limit = tk.StringVar()
+        self.stock_stop_price = tk.StringVar()
+
+        self.option_strategy = tk.StringVar(value="SINGLE")
+        self.option_symbol = tk.StringVar()
+        self.option_side = tk.StringVar(value="BUY_TO_OPEN")
+        self.option_order_type = tk.StringVar(value="LIMIT")
+        self.option_tif = tk.StringVar(value="DAY")
+        self.option_contracts = tk.StringVar()
+        self.option_expiration = tk.StringVar()
+        self.option_strike = tk.StringVar()
+        self.option_call_put = tk.StringVar()
+        self.option_bid = tk.StringVar()
+        self.option_ask = tk.StringVar()
+        self.option_mark = tk.StringVar()
+        self.option_limit_debit = tk.StringVar()
+        self.option_short_strike = tk.StringVar()
+        self.option_credit = tk.StringVar()
+        self.option_target_price = tk.StringVar()
+
         self.open_orders_table: ttk.Treeview | None = None
         self.recent_orders_table: ttk.Treeview | None = None
         self.option_chain_table: ttk.Treeview | None = None
@@ -414,8 +452,11 @@ class SchwabDucketsTab(DucketsTab):
         stock_frame.pack(fill=tk.X, pady=(0, 10))
 
         self._entry_row(stock_frame, "Symbol", self.stock_symbol, 0, 0)
-        self._combo_row(stock_frame, "Side", self.stock_side, ("BUY", "SELL"), 0, 2)
-        self._combo_row(stock_frame, "Order Type", self.stock_order_type, ("LIMIT", "MARKET"), 1, 0)
+
+        self._combo_row(stock_frame, "Side", self.stock_side, SCHWAB_EQUITY_SIDE_CHOICES, 0, 2)
+        self._combo_row(stock_frame, "Order Type", self.stock_order_type, SCHWAB_EQUITY_ORDER_TYPE_CHOICES, 1, 0)
+        self._combo_row(stock_frame, "TIF", self.stock_tif, SCHWAB_EQUITY_TIME_IN_FORCE_CHOICES, 1, 2)
+
         self._entry_row(stock_frame, "Quantity", self.stock_quantity, 1, 2)
         self._entry_row(stock_frame, "Limit Price", self.stock_price, 2, 0)
 
@@ -440,7 +481,8 @@ class SchwabDucketsTab(DucketsTab):
             0,
             2,
         )
-        self._combo_row(option_frame, "Order Type", self.option_order_type, ("LIMIT", "MARKET"), 1, 0)
+        self._combo_row(option_frame, "Order Type", self.option_order_type, SCHWAB_EQUITY_ORDER_TYPE_CHOICES, 1, 0)
+        self._combo_row(option_frame, "TIF", self.option_tif, SCHWAB_EQUITY_TIME_IN_FORCE_CHOICES, 1, 2)
         self._entry_row(option_frame, "Quantity", self.option_quantity, 1, 2)
         self._entry_row(option_frame, "Limit Price", self.option_price, 2, 0)
 
@@ -617,14 +659,18 @@ class SchwabDucketsTab(DucketsTab):
         quantity = int(self.stock_quantity.get().strip())
         order_type = self.stock_order_type.get().strip().upper()
         side = self.stock_side.get().strip().upper()
+        session, duration = schwab_equity_session_duration(self.stock_tif.get())
 
         if not symbol:
             raise ValueError("Stock / ETF symbol is required.")
 
+        if schwab_equity_tif_requires_limit_order(self.stock_tif.get()) and order_type == "MARKET":
+            raise ValueError("Extended-hours Schwab equity orders require a limit price.")
+
         payload: dict[str, object] = {
             "orderType": order_type,
-            "session": "NORMAL",
-            "duration": "DAY",
+            "session": session,
+            "duration": duration,
             "orderStrategyType": "SINGLE",
             "orderLegCollection": [
                 {
@@ -638,24 +684,28 @@ class SchwabDucketsTab(DucketsTab):
             ],
         }
 
-        if order_type == "LIMIT":
-            payload["price"] = self.stock_price.get().strip()
+        if order_type in {"LIMIT", "STOP_LIMIT"}:
+            payload["price"] = self.stock_entry_limit.get().strip()
+
+        if order_type in {"STOP", "STOP_LIMIT"}:
+            payload["stopPrice"] = self.stock_stop_price.get().strip()
 
         return payload
 
     def _option_order_payload(self) -> dict[str, object]:
         symbol = self.option_symbol.get().strip().upper()
-        quantity = int(self.option_quantity.get().strip())
+        quantity = int(self.option_contracts.get().strip())
         order_type = self.option_order_type.get().strip().upper()
         side = self.option_side.get().strip().upper()
+        session, duration = schwab_equity_session_duration(self.option_tif.get())
 
         if not symbol:
             raise ValueError("Option symbol is required.")
 
         payload: dict[str, object] = {
             "orderType": order_type,
-            "session": "NORMAL",
-            "duration": "DAY",
+            "session": session,
+            "duration": duration,
             "orderStrategyType": "SINGLE",
             "orderLegCollection": [
                 {
@@ -669,8 +719,10 @@ class SchwabDucketsTab(DucketsTab):
             ],
         }
 
-        if order_type == "LIMIT":
-            payload["price"] = self.option_price.get().strip()
+        price = self.option_limit_debit.get().strip() or self.option_credit.get().strip()
+
+        if order_type in {"LIMIT", "STOP_LIMIT"}:
+            payload["price"] = price
 
         return payload
 
