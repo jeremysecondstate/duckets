@@ -385,10 +385,16 @@ class SchwabDucketsTab(DucketsTab):
         )
 
     def _build(self, parent: ttk.Frame, title: str, sync_button_text: str) -> None:
-        super()._build(parent, title, sync_button_text)
+        root_panes = ttk.PanedWindow(parent, orient=tk.VERTICAL)
+        root_panes.pack(fill=tk.BOTH, expand=True)
 
-        actions_frame = ttk.LabelFrame(parent, text="Schwab Order Actions")
-        actions_frame.pack(fill=tk.BOTH, expand=True, padx=16, pady=(0, 16))
+        balances_frame = ttk.Frame(root_panes)
+        actions_frame = ttk.LabelFrame(root_panes, text="Schwab Order Actions")
+
+        root_panes.add(balances_frame, weight=3)
+        root_panes.add(actions_frame, weight=2)
+
+        super()._build(balances_frame, title, sync_button_text)
 
         actions_panes = ttk.PanedWindow(actions_frame, orient=tk.HORIZONTAL)
         actions_panes.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
