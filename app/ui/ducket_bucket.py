@@ -29,6 +29,8 @@ HEADER_HOVER = "#dbeafe"
 HEADER_HOVER_TEXT = "#020617"
 SUCCESS = "#22c55e"
 DANGER = "#ef4444"
+FIELD_BACKGROUND = "#e5e7eb"
+FIELD_TEXT = "#020617"
 
 
 def run_ducket_bucket_ui() -> None:
@@ -125,6 +127,40 @@ class DucketBucketApp:
             "TNotebook.Tab",
             background=[("selected", SURFACE_ALT), ("active", HEADER_HOVER)],
             foreground=[("selected", TEXT), ("active", HEADER_HOVER_TEXT)],
+        )
+        style.configure(
+            "TEntry",
+            fieldbackground=FIELD_BACKGROUND,
+            foreground=FIELD_TEXT,
+            insertcolor=FIELD_TEXT,
+        )
+        style.configure(
+            "TCombobox",
+            fieldbackground=FIELD_BACKGROUND,
+            background=FIELD_BACKGROUND,
+            foreground=FIELD_TEXT,
+            arrowcolor=FIELD_TEXT,
+            selectbackground=FIELD_BACKGROUND,
+            selectforeground=FIELD_TEXT,
+        )
+        style.map(
+            "TCombobox",
+            fieldbackground=[
+                ("readonly", FIELD_BACKGROUND),
+                ("active", FIELD_BACKGROUND),
+            ],
+            foreground=[
+                ("readonly", FIELD_TEXT),
+                ("active", FIELD_TEXT),
+            ],
+            selectbackground=[
+                ("readonly", FIELD_BACKGROUND),
+                ("active", FIELD_BACKGROUND),
+            ],
+            selectforeground=[
+                ("readonly", FIELD_TEXT),
+                ("active", FIELD_TEXT),
+            ],
         )
 
     def _build_layout(self) -> None:
@@ -418,6 +454,9 @@ class SchwabDucketsTab(DucketsTab):
 
         super()._build(balances_frame, title, sync_button_text)
 
+        if self.holdings_table is not None:
+            self.holdings_table.bind("<<TreeviewSelect>>", self._use_selected_holding)
+
         actions_panes = ttk.PanedWindow(actions_frame, orient=tk.HORIZONTAL)
         actions_panes.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
 
@@ -699,6 +738,27 @@ class SchwabDucketsTab(DucketsTab):
             return
 
         self.option_limit_debit.set(f"{((bid + ask) / 2):.2f}")
+
+    def _use_selected_holding(self, _event: object) -> None:
+        if self.holdings_table is None:
+            return
+
+        selected = self.holdings_table.selection()
+        if not selected:
+            return
+
+        values = self.holdings_table.item(selected[0], "values")
+        if len(values) < 3:
+            return
+
+        bucket = str(values[1]).strip().upper()
+        symbol = str(values[2]).strip().upper()
+
+        if not symbol:
+            return
+
+        if bucket == "EQUITY":
+            self.stock_symbol.set(symbol)
 
     def _stock_order_payload(self) -> dict[str, object]:
         symbol = self.stock_symbol.get().strip().upper()

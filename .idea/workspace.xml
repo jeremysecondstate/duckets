@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Remove redundant Schwab ticket field initializations">
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Show expanded Schwab ticket fields: Redesign and expand Schwab ticket panels with improved layout and additional fields">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/ui/ducket_bucket.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ui/ducket_bucket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -160,7 +161,7 @@
       <updated>1782170828027</updated>
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
-      <workItem from="1782492563563" duration="27330000" />
+      <workItem from="1782492563563" duration="30122000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -378,14 +379,21 @@
       <option name="project" value="LOCAL" />
       <updated>1782706586012</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="Show expanded Schwab ticket fields: Redesign and expand Schwab ticket panels with improved layout and additional fields">
+      <option name="closed" value="true" />
+      <created>1782706994373</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1782706994373</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="api key change and hyperliquid updates!" />
     <MESSAGE value="added Alex to accounts in hyperliquid!" />
     <MESSAGE value="added and labeled spot and perp balances!" />
     <MESSAGE value="authorize Schwab and persist the token locally" />
@@ -410,7 +418,8 @@
     <MESSAGE value="Use Schwab ticket field mappings" />
     <MESSAGE value="removed " />
     <MESSAGE value="Remove redundant Schwab ticket field initializations" />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove redundant Schwab ticket field initializations" />
+    <MESSAGE value="Show expanded Schwab ticket fields: Redesign and expand Schwab ticket panels with improved layout and additional fields" />
+    <option name="LAST_COMMIT_MESSAGE" value="Show expanded Schwab ticket fields: Redesign and expand Schwab ticket panels with improved layout and additional fields" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
