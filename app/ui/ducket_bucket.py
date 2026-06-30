@@ -14,6 +14,7 @@ from app.services.hyperliquid_trading import (
     HyperliquidOrderTicket,
     format_hyperliquid_limit_price,
     normalize_hyperliquid_coin,
+    normalize_hyperliquid_limit_price,
     normalize_hyperliquid_spot_market,
 )
 
