@@ -7,7 +7,16 @@ from tkinter import messagebox, ttk
 
 from app.models.portfolio import PortfolioSnapshot
 from app.services.aggregate import DucketBucketSnapshot
+
 from app.services.hyperliquid import HyperliquidInfoClient, sync_hyperliquid_portfolios
+from app.services.hyperliquid_trading import (
+    HyperliquidExecutionAdapter,
+    HyperliquidOrderTicket,
+    format_hyperliquid_limit_price,
+    normalize_hyperliquid_coin,
+    normalize_hyperliquid_spot_market,
+)
+
 from app.services.schwab import sync_schwab_portfolio, SchwabSession
 from app.services.schwab_order_fields import (
     SCHWAB_EQUITY_ORDER_TYPE_CHOICES,
@@ -1303,22 +1312,150 @@ class HyperliquidDucketsTab(DucketsTab):
         self._load_hyperliquid_open_orders()
 
     def _load_hyperliquid_open_orders(self) -> None:
-        messagebox.showinfo(
-            "Hyperliquid open orders",
-            "Open-order loading should be wired in Commit 2 using the Hyperliquid info client and account-specific order cache.",
+        if self.hyperliquid_open_orders_table is None:
+            return
+
+        self._clear_table(self.hyperliquid_open_orders_table)
+
+        errors: list[str] = []
+
+        for account_key in ("alex", "jeremy"):
+            try:
+                orders = HyperliquidExecutionAdapter(account_key).open_orders()
+            except Exception as exc:
+                errors.append(f"{account_key}: {type(exc).__name__}: {exc}")
+                continue
+
+            for order in orders:
+                lookup_key = _hyperliquid_open_order_lookup_key(order)
+                self.hyperliquid_open_orders_table.insert(
+                    "",
+                    tk.END,
+                    iid=lookup_key,
+                    values=(
+                        order.get("accountLabel") or account_key.title(),
+                        order.get("oid") or "",
+                        order.get("coin") or "",
+                        _hyperliquid_order_side(order),
+                        order.get("sz") or "",
+                        order.get("limitPx") or order.get("price") or "",
+                        order.get("orderType") or order.get("type") or "Limit",
+                        "yes" if _to_bool(order.get("reduceOnly")) else "no",
+                    ),
+                )
+
+        if errors:
+            messagebox.showwarning("Hyperliquid open orders partially loaded", "\n".join(errors))
+
+    def _spot_order_ticket(self) -> HyperliquidOrderTicket:
+        order_type = self.spot_order_type.get().strip().lower()
+        if order_type != "limit":
+            raise ValueError("Live Hyperliquid spot submit is wired for limit orders first.")
+
+        market = normalize_hyperliquid_spot_market(self.spot_market.get())
+        is_buy = self.spot_side.get().strip().lower() == "buy"
+        limit_price = _required_float(self.spot_entry_limit.get(), "Entry / Limit")
+        raw_quantity = _required_float(self.spot_quantity.get(), "Quantity")
+        unit = self.spot_size_unit.get().strip().upper()
+
+        size = raw_quantity
+        if unit == "USDC":
+            size = raw_quantity / limit_price
+
+        return HyperliquidOrderTicket(
+            coin=market,
+            is_buy=is_buy,
+            size=size,
+            limit_price=limit_price,
+            tif=self.spot_tif.get().strip() or "Gtc",
+            reduce_only=False,
+        )
+
+    def _perp_order_ticket(self) -> HyperliquidOrderTicket:
+        order_type = self.perp_order_type.get().strip().lower()
+        if order_type != "limit":
+            raise ValueError("Live Hyperliquid perp submit is wired for limit orders first.")
+
+        return HyperliquidOrderTicket(
+            coin=normalize_hyperliquid_coin(self.perp_coin.get()),
+            is_buy=self.perp_direction.get().strip().lower() == "buy",
+            size=_required_float(self.perp_size.get(), "Size"),
+            limit_price=_required_float(self.perp_entry_limit.get(), "Entry / Limit"),
+            tif=self.perp_tif.get().strip() or "Gtc",
+            reduce_only=bool(self.perp_reduce_only.get()),
         )
 
     def _submit_spot_order(self, account_key: str) -> None:
-        self._hyperliquid_action_not_wired("submit spot order", account_key)
+        try:
+            ticket = self._spot_order_ticket()
+
+            if not messagebox.askyesno(
+                "Confirm Hyperliquid Spot Order",
+                _hyperliquid_order_confirmation_message(account_key, ticket),
+            ):
+                return
+
+            result = HyperliquidExecutionAdapter(account_key).submit(ticket)
+            self._load_hyperliquid_open_orders()
+            messagebox.showinfo(
+                "Hyperliquid spot order submitted",
+                _hyperliquid_order_submitted_message(account_key, ticket, result),
+            )
+        except Exception as exc:
+            messagebox.showerror("Hyperliquid spot order failed", f"{type(exc).__name__}: {exc}")
 
     def _submit_perp_order(self, account_key: str) -> None:
-        self._hyperliquid_action_not_wired("submit perp order", account_key)
+        try:
+            ticket = self._perp_order_ticket()
+
+            if not messagebox.askyesno(
+                "Confirm Hyperliquid Perp Order",
+                _hyperliquid_order_confirmation_message(account_key, ticket),
+            ):
+                return
+
+            result = HyperliquidExecutionAdapter(account_key).submit(ticket)
+            self._load_hyperliquid_open_orders()
+            messagebox.showinfo(
+                "Hyperliquid perp order submitted",
+                _hyperliquid_order_submitted_message(account_key, ticket, result),
+            )
+        except Exception as exc:
+            messagebox.showerror("Hyperliquid perp order failed", f"{type(exc).__name__}: {exc}")
 
     def _cancel_spot_order(self, account_key: str) -> None:
-        self._hyperliquid_action_not_wired("cancel spot order", account_key)
+        try:
+            coin = normalize_hyperliquid_spot_market(self.spot_market.get())
+            order_id = _positive_int(self.spot_cancel_order_id.get(), "Cancel order ID")
+
+            if not messagebox.askyesno(
+                "Confirm Hyperliquid Spot Cancel",
+                f"Cancel {account_key.upper()} spot order?\n\nCoin: {coin}\nOrder ID: {order_id}",
+            ):
+                return
+
+            result = HyperliquidExecutionAdapter(account_key).cancel(coin, order_id)
+            self._load_hyperliquid_open_orders()
+            messagebox.showinfo("Hyperliquid spot cancel submitted", f"Response:\n{result}")
+        except Exception as exc:
+            messagebox.showerror("Hyperliquid spot cancel failed", f"{type(exc).__name__}: {exc}")
 
     def _cancel_perp_order(self, account_key: str) -> None:
-        self._hyperliquid_action_not_wired("cancel perp order", account_key)
+        try:
+            coin = normalize_hyperliquid_coin(self.perp_coin.get())
+            order_id = _positive_int(self.perp_cancel_order_id.get(), "Cancel order ID")
+
+            if not messagebox.askyesno(
+                "Confirm Hyperliquid Perp Cancel",
+                f"Cancel {account_key.upper()} perp order?\n\nCoin: {coin}\nOrder ID: {order_id}",
+            ):
+                return
+
+            result = HyperliquidExecutionAdapter(account_key).cancel(coin, order_id)
+            self._load_hyperliquid_open_orders()
+            messagebox.showinfo("Hyperliquid perp cancel submitted", f"Response:\n{result}")
+        except Exception as exc:
+            messagebox.showerror("Hyperliquid perp cancel failed", f"{type(exc).__name__}: {exc}")
 
     def _edit_selected_perp_position(self) -> None:
         self._hyperliquid_action_not_wired("edit selected perp position", "selected account")
@@ -1371,12 +1508,19 @@ class HyperliquidDucketsTab(DucketsTab):
         if len(values) < 3:
             return
 
+        account = str(values[0])
         order_id = str(values[1])
         coin = str(values[2])
+
         self.spot_cancel_order_id.set(order_id)
         self.perp_cancel_order_id.set(order_id)
         self.spot_market.set(coin)
         self.perp_coin.set(coin)
+
+        messagebox.showinfo(
+            "Hyperliquid order selected",
+            f"Selected {account} order {order_id} for {coin}.",
+        )
 
 
 def _hyperliquid_mid_candidates(market: str) -> tuple[str, ...]:
@@ -1471,6 +1615,96 @@ def _spot_base_balance(snapshot: PortfolioSnapshot, base: str) -> float:
 def _format_hyperliquid_size(value: float) -> str:
     text = f"{value:.8f}".rstrip("0").rstrip(".")
     return text or "0"
+
+
+def _required_float(value: object, label: str) -> float:
+    number = _to_float(value)
+
+    if number is None or number <= 0:
+        raise ValueError(f"{label} must be a positive number.")
+
+    return number
+
+
+def _hyperliquid_order_confirmation_message(
+    account_key: str,
+    ticket: HyperliquidOrderTicket,
+) -> str:
+    normalized_price = normalize_hyperliquid_limit_price(ticket.limit_price, is_buy=ticket.is_buy)
+
+    return "\n".join(
+        [
+            "Review this LIVE Hyperliquid order before submitting:",
+            "",
+            f"Account: {account_key.upper()}",
+            f"Coin: {ticket.coin}",
+            f"Side: {ticket.side_label}",
+            f"Size: {ticket.size:g}",
+            f"Limit price: {format_hyperliquid_limit_price(normalized_price)}",
+            f"Estimated notional: ${ticket.notional:,.2f}",
+            f"TIF: {ticket.tif}",
+            f"Reduce only: {'yes' if ticket.reduce_only else 'no'}",
+            "",
+            "Submit this order?",
+        ]
+    )
+
+
+def _hyperliquid_order_submitted_message(
+    account_key: str,
+    ticket: HyperliquidOrderTicket,
+    result: object,
+) -> str:
+    return "\n".join(
+        [
+            "Hyperliquid accepted the submit request.",
+            "",
+            f"Account: {account_key.upper()}",
+            f"Coin: {ticket.coin}",
+            f"Side: {ticket.side_label}",
+            f"Size: {ticket.size:g}",
+            f"Limit price: {format_hyperliquid_limit_price(ticket.limit_price)}",
+            f"Estimated notional: ${ticket.notional:,.2f}",
+            "",
+            f"Response: {result}",
+        ]
+    )
+
+
+def _hyperliquid_open_order_lookup_key(order: dict[str, object]) -> str:
+    account_key = str(order.get("accountKey") or "").strip().lower()
+    account_address = str(order.get("accountAddress") or "").strip().lower()
+    order_id = str(order.get("oid") or "").strip()
+
+    if account_key:
+        return f"{account_key}:{order_id}"
+
+    if account_address:
+        return f"{account_address}:{order_id}"
+
+    return order_id
+
+
+def _hyperliquid_order_side(order: dict[str, object]) -> str:
+    side = str(order.get("side") or order.get("dir") or "").strip()
+    if side:
+        return side
+
+    is_buy = order.get("isBuy")
+    if _to_bool(is_buy):
+        return "buy"
+
+    if is_buy is not None:
+        return "sell"
+
+    return ""
+
+
+def _to_bool(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+
+    return str(value).strip().lower() in {"1", "true", "yes", "y"}
 
 
 def _pnl_row_tag(*values: float | None) -> tuple[str, ...]:
