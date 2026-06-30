@@ -44,6 +44,24 @@ SCHWAB_EQUITY_LIMIT_TIFS = {
     TimeInForce.PM,
 }
 
+SCHWAB_OPTION_STRATEGY_CHOICES = (
+    "SINGLE",
+    "COVERED_STOCK",
+    "VERTICAL",
+    "BUTTERFLY",
+    "CALENDAR",
+    "DIAGONAL",
+    "IRON_CONDOR",
+)
+
+SCHWAB_SUPPORTED_OPTION_STRATEGIES = {
+    "SINGLE",
+}
+
+
+def schwab_option_strategy_is_supported(strategy: str) -> bool:
+    return str(strategy).strip().upper() in SCHWAB_SUPPORTED_OPTION_STRATEGIES
+
 
 def schwab_equity_session_duration(time_in_force: str) -> tuple[str, str]:
     tif = TimeInForce(str(time_in_force).strip().upper())

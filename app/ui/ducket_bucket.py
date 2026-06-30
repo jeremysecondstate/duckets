@@ -13,8 +13,10 @@ from app.services.schwab_order_fields import (
     SCHWAB_EQUITY_ORDER_TYPE_CHOICES,
     SCHWAB_EQUITY_SIDE_CHOICES,
     SCHWAB_EQUITY_TIME_IN_FORCE_CHOICES,
+    SCHWAB_OPTION_STRATEGY_CHOICES,
     schwab_equity_session_duration,
     schwab_equity_tif_requires_limit_order,
+    schwab_option_strategy_is_supported,
 )
 
 BACKGROUND = "#0b1220"
@@ -532,7 +534,7 @@ class SchwabDucketsTab(DucketsTab):
             pady=8,
         )
 
-        self._combo_row(option_frame, "Strategy", self.option_strategy, ("SINGLE", "VERTICAL"), 0, 0)
+        self._combo_row(option_frame, "Strategy", self.option_strategy, SCHWAB_OPTION_STRATEGY_CHOICES, 0, 0)
         self._entry_row(option_frame, "Contracts", self.option_contracts, 0, 2)
 
         self._entry_row(option_frame, "Expiration", self.option_expiration, 1, 0)
@@ -846,8 +848,11 @@ class SchwabDucketsTab(DucketsTab):
         session, duration = schwab_equity_session_duration(self.option_tif.get())
 
         strategy = self.option_strategy.get().strip().upper()
-        if strategy != "SINGLE":
-            raise ValueError("Only SINGLE option orders are wired up right now.")
+        if not schwab_option_strategy_is_supported(strategy):
+            raise ValueError(
+                f"{strategy} is available in the ticket, but live submit is not wired yet. "
+                "Use SINGLE for now."
+            )
 
         if not symbol:
             raise ValueError("Option symbol is required.")
