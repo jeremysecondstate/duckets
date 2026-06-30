@@ -990,6 +990,7 @@ class HyperliquidDucketsTab(DucketsTab):
         self.perp_fee_rate = tk.StringVar(value="0.045")
         self.perp_cancel_order_id = tk.StringVar()
 
+        self.latest_hyperliquid_bucket: DucketBucketSnapshot | None = None
         self.hyperliquid_open_orders_table: ttk.Treeview | None = None
 
         super().__init__(
@@ -1030,6 +1031,10 @@ class HyperliquidDucketsTab(DucketsTab):
         self._build_perp_ticket(perp_frame)
         self._build_hyperliquid_orders_panel(orders_frame)
 
+    def _show_bucket(self, bucket: DucketBucketSnapshot) -> None:
+        self.latest_hyperliquid_bucket = bucket
+        super()._show_bucket(bucket)
+
     def _build_spot_ticket(self, parent: ttk.Frame) -> None:
         ticket = ttk.LabelFrame(parent, text="Hyperliquid Spot Ticket")
         ticket.pack(fill=tk.BOTH, expand=True)
@@ -1046,23 +1051,19 @@ class HyperliquidDucketsTab(DucketsTab):
             row=3, column=2, columnspan=2, sticky="ew", padx=8, pady=6
         )
 
-        size_row = ttk.Frame(ticket)
-        size_row.grid(row=4, column=0, columnspan=4, sticky="ew", padx=8, pady=6)
-        for label, pct in (("25%", 25), ("50%", 50), ("75%", 75), ("Max", 100)):
-            ttk.Button(size_row, text=label, command=lambda value=pct: self._apply_spot_size_percent(value)).pack(
-                side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 6)
-            )
+        self._hl_size_button_row(ticket, "Alex size %", "alex", 4)
+        self._hl_size_button_row(ticket, "Jeremy size %", "jeremy", 5)
 
         ttk.Label(ticket, textvariable=self.spot_size_status).grid(
-            row=5, column=0, columnspan=4, sticky="w", padx=8, pady=(0, 6)
+            row=6, column=0, columnspan=4, sticky="w", padx=8, pady=(0, 6)
         )
 
-        self._hl_entry_row(ticket, "Stop price", self.spot_stop_price, 6, 0)
-        self._hl_combo_row(ticket, "HL TIF", self.spot_tif, HYPERLIQUID_TIF_CHOICES, 7, 0)
-        self._hl_entry_row(ticket, "Cancel order ID", self.spot_cancel_order_id, 8, 0)
+        self._hl_entry_row(ticket, "Stop price", self.spot_stop_price, 7, 0)
+        self._hl_combo_row(ticket, "HL TIF", self.spot_tif, HYPERLIQUID_TIF_CHOICES, 8, 0)
+        self._hl_entry_row(ticket, "Cancel order ID", self.spot_cancel_order_id, 9, 0)
 
         actions = ttk.LabelFrame(ticket, text="Spot Actions")
-        actions.grid(row=9, column=0, columnspan=4, sticky="ew", padx=8, pady=8)
+        actions.grid(row=10, column=0, columnspan=4, sticky="ew", padx=8, pady=8)
         actions.columnconfigure((0, 1), weight=1)
 
         self._hl_button(actions, "Submit Order Alex", lambda: self._submit_spot_order("alex"), 0, 0)
@@ -1134,6 +1135,21 @@ class HyperliquidDucketsTab(DucketsTab):
         self.hyperliquid_open_orders_table.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
         self.hyperliquid_open_orders_table.bind("<<TreeviewSelect>>", self._use_selected_hyperliquid_order)
 
+    def _hyperliquid_account_snapshot(self, account_key: str) -> PortfolioSnapshot:
+        bucket = self.latest_hyperliquid_bucket
+
+        if bucket is None:
+            raise ValueError("Sync Hyperliquid first.")
+
+        normalized_key = account_key.strip().lower()
+
+        for snapshot in bucket.snapshots:
+            if snapshot.account_label.strip().lower() == normalized_key:
+                return snapshot
+
+        labels = ", ".join(snapshot.account_label for snapshot in bucket.snapshots) or "--"
+        raise ValueError(f"No synced Hyperliquid account named {account_key}. Synced accounts: {labels}")
+
     def _hl_entry_row(
         self,
         parent: ttk.LabelFrame,
@@ -1200,6 +1216,25 @@ class HyperliquidDucketsTab(DucketsTab):
             pady=4,
         )
 
+    def _hl_size_button_row(
+        self,
+        parent: ttk.LabelFrame,
+        label: str,
+        account_key: str,
+        row: int,
+    ) -> None:
+        ttk.Label(parent, text=label).grid(row=row, column=0, sticky="w", padx=8, pady=6)
+
+        button_row = ttk.Frame(parent)
+        button_row.grid(row=row, column=1, columnspan=3, sticky="ew", padx=8, pady=6)
+
+        for button_label, percent in (("25%", 25), ("50%", 50), ("75%", 75), ("Max", 100)):
+            ttk.Button(
+                button_row,
+                text=button_label,
+                command=lambda pct=percent, acct=account_key: self._apply_spot_size_percent(acct, pct),
+            ).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 6))
+
     def _use_spot_mid(self) -> None:
         self._use_hyperliquid_mid(self.spot_market.get(), self.spot_entry_limit)
 
@@ -1227,10 +1262,41 @@ class HyperliquidDucketsTab(DucketsTab):
         except Exception as exc:
             messagebox.showerror("Hyperliquid mid failed", f"{type(exc).__name__}: {exc}")
 
-    def _apply_spot_size_percent(self, percent: int) -> None:
-        self.spot_size_status.set(
-            f"{percent}% selected. Size calculation will be wired after Hyperliquid balances are cached."
-        )
+    def _apply_spot_size_percent(self, account_key: str, percent: int) -> None:
+        try:
+            snapshot = self._hyperliquid_account_snapshot(account_key)
+
+            market = self.spot_market.get().strip().upper()
+            if not market:
+                raise ValueError("Enter a spot market first.")
+
+            side = self.spot_side.get().strip().lower()
+            unit = self.spot_size_unit.get().strip().upper()
+            base = _hyperliquid_display_symbol(market)
+            price = _to_float(self.spot_entry_limit.get())
+
+            max_base_size, basis = _max_spot_base_size(snapshot, base, side, price)
+            selected_base_size = max_base_size * (float(percent) / 100.0)
+
+            if selected_base_size <= 0:
+                raise ValueError(f"No available {basis} for {snapshot.account_label}.")
+
+            if unit == "USDC":
+                if price is None or price <= 0:
+                    raise ValueError("Enter a positive Entry / Limit price before sizing in USDC.")
+
+                selected_quote_size = selected_base_size * price
+                self.spot_quantity.set(_format_hyperliquid_size(selected_quote_size))
+                displayed = f"{_format_hyperliquid_size(selected_quote_size)} USDC"
+            else:
+                self.spot_quantity.set(_format_hyperliquid_size(selected_base_size))
+                displayed = f"{_format_hyperliquid_size(selected_base_size)} {base}"
+
+            self.spot_size_status.set(
+                f"{snapshot.account_label} {percent}% of {basis} = {displayed}"
+            )
+        except Exception as exc:
+            self.spot_size_status.set(f"Size helper: {type(exc).__name__}: {exc}")
 
     def _refresh_hyperliquid(self) -> None:
         self._sync()
@@ -1354,6 +1420,57 @@ def _dedupe_strings(values: list[str]) -> list[str]:
             result.append(value)
 
     return result
+
+
+def _max_spot_base_size(
+    snapshot: PortfolioSnapshot,
+    base: str,
+    side: str,
+    price: float | None,
+) -> tuple[float, str]:
+    normalized_base = _hyperliquid_display_symbol(base)
+
+    if side == "sell":
+        base_balance = _spot_base_balance(snapshot, normalized_base)
+        return base_balance, f"{normalized_base} spot balance"
+
+    if side == "buy":
+        if price is None or price <= 0:
+            raise ValueError("Enter a positive Entry / Limit price before sizing a buy.")
+
+        quote_balance = _spot_quote_balance(snapshot, "USDC")
+        return quote_balance / price, f"USDC spot cash at {price:g}"
+
+    raise ValueError("Side must be buy or sell.")
+
+
+def _spot_quote_balance(snapshot: PortfolioSnapshot, quote: str) -> float:
+    normalized_quote = quote.strip().upper()
+
+    for cash in snapshot.cash:
+        if cash.bucket.strip().upper() == "SPOT" and cash.symbol.strip().upper() == normalized_quote:
+            return max(float(cash.amount), 0.0)
+
+    return 0.0
+
+
+def _spot_base_balance(snapshot: PortfolioSnapshot, base: str) -> float:
+    normalized_base = _hyperliquid_display_symbol(base)
+
+    for holding in snapshot.holdings:
+        if holding.bucket.strip().upper() != "SPOT":
+            continue
+
+        holding_base = _hyperliquid_display_symbol(holding.symbol)
+        if holding_base == normalized_base:
+            return max(float(holding.quantity), 0.0)
+
+    return 0.0
+
+
+def _format_hyperliquid_size(value: float) -> str:
+    text = f"{value:.8f}".rstrip("0").rstrip(".")
+    return text or "0"
 
 
 def _pnl_row_tag(*values: float | None) -> tuple[str, ...]:
