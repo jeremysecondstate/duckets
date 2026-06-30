@@ -473,13 +473,19 @@ class SchwabDucketsTab(DucketsTab):
         actions_panes.add(left_frame, weight=2)
         actions_panes.add(right_frame, weight=3)
 
-        self._build_ticket_panel(left_frame)
-        self._build_orders_panel(right_frame)
-        self._build_option_chain_panel(right_frame)
+        left_panes = ttk.PanedWindow(left_frame, orient=tk.VERTICAL)
+        left_panes.pack(fill=tk.BOTH, expand=True)
+
+        right_panes = ttk.PanedWindow(right_frame, orient=tk.VERTICAL)
+        right_panes.pack(fill=tk.BOTH, expand=True)
+
+        self._build_ticket_panel(left_panes)
+        self._build_orders_panel(right_panes)
+        self._build_option_chain_panel(right_panes)
 
     def _build_ticket_panel(self, parent: ttk.Frame) -> None:
         ticket_frame = ttk.LabelFrame(parent, text="Schwab Stock / ETF Ticket")
-        ticket_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        parent.add(ticket_frame, weight=4)
 
         ticket_columns = ttk.PanedWindow(ticket_frame, orient=tk.HORIZONTAL)
         ticket_columns.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
@@ -570,7 +576,7 @@ class SchwabDucketsTab(DucketsTab):
         )
 
         cancel_frame = ttk.LabelFrame(parent, text="Cancel Order")
-        cancel_frame.pack(fill=tk.X)
+        parent.add(cancel_frame, weight=1)
 
         self._entry_row(cancel_frame, "Cancel Order ID", self.order_id, 0, 0)
 
@@ -585,7 +591,7 @@ class SchwabDucketsTab(DucketsTab):
 
     def _build_orders_panel(self, parent: ttk.Frame) -> None:
         orders_frame = ttk.LabelFrame(parent, text="Orders")
-        orders_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        parent.add(orders_frame, weight=2)
 
         button_row = ttk.Frame(orders_frame)
         button_row.pack(fill=tk.X, padx=8, pady=8)
@@ -607,7 +613,7 @@ class SchwabDucketsTab(DucketsTab):
 
     def _build_option_chain_panel(self, parent: ttk.Frame) -> None:
         chain_frame = ttk.LabelFrame(parent, text="Options Chain")
-        chain_frame.pack(fill=tk.BOTH, expand=True)
+        parent.add(chain_frame, weight=2)
 
         input_row = ttk.Frame(chain_frame)
         input_row.pack(fill=tk.X, padx=8, pady=8)
@@ -633,6 +639,8 @@ class SchwabDucketsTab(DucketsTab):
         self._setup_column(self.option_chain_table, "bid", "Bid", 90, anchor=tk.E)
         self._setup_column(self.option_chain_table, "ask", "Ask", 90, anchor=tk.E)
         self._setup_column(self.option_chain_table, "mark", "Mark", 90, anchor=tk.E)
+        self.option_chain_table.tag_configure("option_itm", foreground=SUCCESS)
+        self.option_chain_table.tag_configure("option_otm", foreground=DANGER)
         self.option_chain_table.pack(fill=tk.BOTH, expand=True, padx=8, pady=(0, 8))
         self.option_chain_table.bind("<<TreeviewSelect>>", self._use_selected_option)
 
@@ -928,6 +936,7 @@ class SchwabDucketsTab(DucketsTab):
                     row["ask"],
                     row["mark"],
                 ),
+                tags=_option_moneyness_tag(row),
             )
 
     def _use_selected_option(self, _event: object) -> None:
@@ -1131,10 +1140,51 @@ def _option_chain_rows(chain: object) -> list[dict[str, object]]:
                             "bid": contract.get("bid") or "",
                             "ask": contract.get("ask") or "",
                             "mark": contract.get("mark") or "",
+                            "in_the_money": _option_in_the_money(contract),
                         }
                     )
 
     return rows
+
+
+def _option_moneyness_tag(row: dict[str, object]) -> tuple[str, ...]:
+    in_the_money = row.get("in_the_money")
+
+    if in_the_money is True:
+        return ("option_itm",)
+
+    if in_the_money is False:
+        return ("option_otm",)
+
+    return ()
+
+
+def _option_in_the_money(contract: dict[str, object]) -> bool | None:
+    flag = _to_bool(contract.get("inTheMoney"))
+    if flag is not None:
+        return flag
+
+    intrinsic_value = _to_float(contract.get("intrinsicValue"))
+    if intrinsic_value is not None:
+        return intrinsic_value > 0
+
+    return None
+
+
+def _to_bool(value: object) -> bool | None:
+    if isinstance(value, bool):
+        return value
+
+    if isinstance(value, str):
+        cleaned = value.strip().lower()
+
+        if cleaned in {"true", "yes", "1"}:
+            return True
+
+        if cleaned in {"false", "no", "0"}:
+            return False
+
+    return None
 
 
 def _positive_int(value: object, label: str) -> int:
