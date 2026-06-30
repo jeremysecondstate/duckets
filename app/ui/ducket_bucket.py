@@ -7,7 +7,7 @@ from tkinter import messagebox, ttk
 
 from app.models.portfolio import PortfolioSnapshot
 from app.services.aggregate import DucketBucketSnapshot
-from app.services.hyperliquid import sync_hyperliquid_portfolios
+from app.services.hyperliquid import HyperliquidInfoClient, sync_hyperliquid_portfolios
 from app.services.schwab import sync_schwab_portfolio, SchwabSession
 from app.services.schwab_order_fields import (
     SCHWAB_EQUITY_ORDER_TYPE_CHOICES,
@@ -33,6 +33,11 @@ SUCCESS = "#22c55e"
 DANGER = "#ef4444"
 FIELD_BACKGROUND = "#e5e7eb"
 FIELD_TEXT = "#020617"
+HYPERLIQUID_SIDE_CHOICES = ("buy", "sell")
+HYPERLIQUID_ORDER_TYPE_CHOICES = ("limit", "market", "trigger")
+HYPERLIQUID_TIF_CHOICES = ("Gtc", "Ioc", "Alo")
+HYPERLIQUID_SPOT_SIZE_UNITS = ("USDC", "BASE")
+HYPERLIQUID_MARGIN_MODE_CHOICES = ("Cross", "Isolated")
 
 
 def run_ducket_bucket_ui() -> None:
@@ -190,12 +195,9 @@ class DucketBucketApp:
             parent=schwab_frame,
         )
 
-        DucketsTab(
+        HyperliquidDucketsTab(
             root=self.root,
             parent=hyperliquid_frame,
-            title="Hyperliquid Duckets",
-            sync_button_text="Sync Hyperliquid",
-            sync_snapshots=sync_hyperliquid_portfolios,
         )
 
 
@@ -958,6 +960,400 @@ class SchwabDucketsTab(DucketsTab):
         self.option_bid.set(str(values[4]))
         self.option_ask.set(str(values[5]))
         self.option_mark.set(str(values[6]))
+
+
+class HyperliquidDucketsTab(DucketsTab):
+    def __init__(self, root: tk.Tk, parent: ttk.Frame) -> None:
+        self.spot_market = tk.StringVar()
+        self.spot_side = tk.StringVar(value="buy")
+        self.spot_order_type = tk.StringVar(value="limit")
+        self.spot_quantity = tk.StringVar()
+        self.spot_size_unit = tk.StringVar(value="USDC")
+        self.spot_entry_limit = tk.StringVar()
+        self.spot_stop_price = tk.StringVar()
+        self.spot_tif = tk.StringVar(value="Gtc")
+        self.spot_cancel_order_id = tk.StringVar()
+        self.spot_size_status = tk.StringVar(value="Sync Hyperliquid, then choose a size %")
+
+        self.perp_coin = tk.StringVar()
+        self.perp_direction = tk.StringVar(value="buy")
+        self.perp_order_type = tk.StringVar(value="limit")
+        self.perp_size = tk.StringVar()
+        self.perp_entry_limit = tk.StringVar()
+        self.perp_tp_price = tk.StringVar()
+        self.perp_sl_price = tk.StringVar()
+        self.perp_tif = tk.StringVar(value="Gtc")
+        self.perp_reduce_only = tk.BooleanVar(value=False)
+        self.perp_leverage = tk.StringVar(value="1")
+        self.perp_margin_mode = tk.StringVar(value="Cross")
+        self.perp_attach_tpsl = tk.BooleanVar(value=False)
+        self.perp_fee_rate = tk.StringVar(value="0.045")
+        self.perp_cancel_order_id = tk.StringVar()
+
+        self.hyperliquid_open_orders_table: ttk.Treeview | None = None
+
+        super().__init__(
+            root=root,
+            parent=parent,
+            title="Hyperliquid Duckets",
+            sync_button_text="Sync Hyperliquid",
+            sync_snapshots=sync_hyperliquid_portfolios,
+        )
+
+    def _build(self, parent: ttk.Frame, title: str, sync_button_text: str) -> None:
+        root_panes = ttk.PanedWindow(parent, orient=tk.VERTICAL)
+        root_panes.pack(fill=tk.BOTH, expand=True)
+
+        balances_frame = ttk.Frame(root_panes)
+        actions_frame = ttk.LabelFrame(root_panes, text="Hyperliquid Order Actions")
+
+        root_panes.add(balances_frame, weight=3)
+        root_panes.add(actions_frame, weight=2)
+
+        super()._build(balances_frame, title, sync_button_text)
+
+        if self.holdings_table is not None:
+            self.holdings_table.bind("<<TreeviewSelect>>", self._use_selected_hyperliquid_holding)
+
+        actions_panes = ttk.PanedWindow(actions_frame, orient=tk.HORIZONTAL)
+        actions_panes.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+
+        spot_frame = ttk.Frame(actions_panes)
+        perp_frame = ttk.Frame(actions_panes)
+        orders_frame = ttk.Frame(actions_panes)
+
+        actions_panes.add(spot_frame, weight=2)
+        actions_panes.add(perp_frame, weight=2)
+        actions_panes.add(orders_frame, weight=3)
+
+        self._build_spot_ticket(spot_frame)
+        self._build_perp_ticket(perp_frame)
+        self._build_hyperliquid_orders_panel(orders_frame)
+
+    def _build_spot_ticket(self, parent: ttk.Frame) -> None:
+        ticket = ttk.LabelFrame(parent, text="Hyperliquid Spot Ticket")
+        ticket.pack(fill=tk.BOTH, expand=True)
+
+        self._hl_entry_row(ticket, "Market", self.spot_market, 0, 0)
+        self._hl_combo_row(ticket, "Side", self.spot_side, HYPERLIQUID_SIDE_CHOICES, 1, 0)
+        self._hl_combo_row(ticket, "Order type", self.spot_order_type, HYPERLIQUID_ORDER_TYPE_CHOICES, 1, 2)
+
+        self._hl_entry_row(ticket, "Quantity", self.spot_quantity, 2, 0)
+        self._hl_combo_row(ticket, "Unit", self.spot_size_unit, HYPERLIQUID_SPOT_SIZE_UNITS, 2, 2)
+
+        self._hl_entry_row(ticket, "Entry / Limit", self.spot_entry_limit, 3, 0)
+        ttk.Button(ticket, text="Use Mid", command=self._use_spot_mid).grid(
+            row=3, column=2, columnspan=2, sticky="ew", padx=8, pady=6
+        )
+
+        size_row = ttk.Frame(ticket)
+        size_row.grid(row=4, column=0, columnspan=4, sticky="ew", padx=8, pady=6)
+        for label, pct in (("25%", 25), ("50%", 50), ("75%", 75), ("Max", 100)):
+            ttk.Button(size_row, text=label, command=lambda value=pct: self._apply_spot_size_percent(value)).pack(
+                side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 6)
+            )
+
+        ttk.Label(ticket, textvariable=self.spot_size_status).grid(
+            row=5, column=0, columnspan=4, sticky="w", padx=8, pady=(0, 6)
+        )
+
+        self._hl_entry_row(ticket, "Stop price", self.spot_stop_price, 6, 0)
+        self._hl_combo_row(ticket, "HL TIF", self.spot_tif, HYPERLIQUID_TIF_CHOICES, 7, 0)
+        self._hl_entry_row(ticket, "Cancel order ID", self.spot_cancel_order_id, 8, 0)
+
+        actions = ttk.LabelFrame(ticket, text="Spot Actions")
+        actions.grid(row=9, column=0, columnspan=4, sticky="ew", padx=8, pady=8)
+        actions.columnconfigure((0, 1), weight=1)
+
+        self._hl_button(actions, "Submit Order Alex", lambda: self._submit_spot_order("alex"), 0, 0)
+        self._hl_button(actions, "Submit Order Jeremy", lambda: self._submit_spot_order("jeremy"), 0, 1)
+        self._hl_button(actions, "Cancel Order Alex", lambda: self._cancel_spot_order("alex"), 1, 0)
+        self._hl_button(actions, "Cancel Order Jeremy", lambda: self._cancel_spot_order("jeremy"), 1, 1)
+        self._hl_button(actions, "Refresh Balances / Open Orders", self._refresh_hyperliquid, 2, 0, columnspan=2)
+
+    def _build_perp_ticket(self, parent: ttk.Frame) -> None:
+        ticket = ttk.LabelFrame(parent, text="Hyperliquid Perp Ticket")
+        ticket.pack(fill=tk.BOTH, expand=True)
+
+        self._hl_entry_row(ticket, "Coin", self.perp_coin, 0, 0)
+        self._hl_combo_row(ticket, "Direction", self.perp_direction, HYPERLIQUID_SIDE_CHOICES, 1, 0)
+        self._hl_combo_row(ticket, "Order type", self.perp_order_type, HYPERLIQUID_ORDER_TYPE_CHOICES, 1, 2)
+
+        self._hl_entry_row(ticket, "Size", self.perp_size, 2, 0)
+        self._hl_entry_row(ticket, "Entry / Limit", self.perp_entry_limit, 2, 2)
+
+        self._hl_entry_row(ticket, "TP price", self.perp_tp_price, 3, 0)
+        self._hl_entry_row(ticket, "SL price", self.perp_sl_price, 3, 2)
+
+        self._hl_combo_row(ticket, "HL TIF", self.perp_tif, HYPERLIQUID_TIF_CHOICES, 4, 0)
+        self._hl_check_row(ticket, "Reduce-only", self.perp_reduce_only, 4, 2)
+
+        ttk.Button(ticket, text="Use Mid", command=self._use_perp_mid).grid(
+            row=5, column=2, columnspan=2, sticky="ew", padx=8, pady=6
+        )
+
+        self._hl_entry_row(ticket, "Leverage x", self.perp_leverage, 6, 0)
+        self._hl_combo_row(ticket, "Margin mode", self.perp_margin_mode, HYPERLIQUID_MARGIN_MODE_CHOICES, 6, 2)
+
+        self._hl_check_row(ticket, "Attach TP/SL", self.perp_attach_tpsl, 7, 0)
+        self._hl_entry_row(ticket, "Fee % / side", self.perp_fee_rate, 7, 2)
+
+        self._hl_entry_row(ticket, "Cancel order ID", self.perp_cancel_order_id, 8, 0)
+
+        actions = ttk.LabelFrame(ticket, text="Perp Actions")
+        actions.grid(row=9, column=0, columnspan=4, sticky="ew", padx=8, pady=8)
+        actions.columnconfigure((0, 1), weight=1)
+
+        self._hl_button(actions, "Submit Order Alex", lambda: self._submit_perp_order("alex"), 0, 0)
+        self._hl_button(actions, "Submit Order Jeremy", lambda: self._submit_perp_order("jeremy"), 0, 1)
+        self._hl_button(actions, "Cancel Order Alex", lambda: self._cancel_perp_order("alex"), 1, 0)
+        self._hl_button(actions, "Cancel Order Jeremy", lambda: self._cancel_perp_order("jeremy"), 1, 1)
+        self._hl_button(actions, "Edit Selected Position", self._edit_selected_perp_position, 2, 0)
+        self._hl_button(actions, "TP/SL Orders", self._open_tpsl_orders, 2, 1)
+        self._hl_button(actions, "Open Orders", self._load_hyperliquid_open_orders, 3, 0)
+        self._hl_button(actions, "Refresh", self._refresh_hyperliquid, 3, 1)
+
+    def _build_hyperliquid_orders_panel(self, parent: ttk.Frame) -> None:
+        panel = ttk.LabelFrame(parent, text="Hyperliquid Open Orders")
+        panel.pack(fill=tk.BOTH, expand=True)
+
+        self.hyperliquid_open_orders_table = ttk.Treeview(
+            panel,
+            columns=("account", "oid", "coin", "side", "size", "price", "type", "reduce_only"),
+            show="headings",
+            height=10,
+        )
+        self._setup_column(self.hyperliquid_open_orders_table, "account", "Account", 90)
+        self._setup_column(self.hyperliquid_open_orders_table, "oid", "Order ID", 110)
+        self._setup_column(self.hyperliquid_open_orders_table, "coin", "Coin", 90)
+        self._setup_column(self.hyperliquid_open_orders_table, "side", "Side", 80)
+        self._setup_column(self.hyperliquid_open_orders_table, "size", "Size", 100, anchor=tk.E)
+        self._setup_column(self.hyperliquid_open_orders_table, "price", "Price", 100, anchor=tk.E)
+        self._setup_column(self.hyperliquid_open_orders_table, "type", "Type", 110)
+        self._setup_column(self.hyperliquid_open_orders_table, "reduce_only", "Reduce", 80)
+        self.hyperliquid_open_orders_table.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+        self.hyperliquid_open_orders_table.bind("<<TreeviewSelect>>", self._use_selected_hyperliquid_order)
+
+    def _hl_entry_row(
+        self,
+        parent: ttk.LabelFrame,
+        label: str,
+        variable: tk.StringVar,
+        row: int,
+        column: int,
+    ) -> None:
+        ttk.Label(parent, text=label).grid(row=row, column=column, sticky="w", padx=8, pady=6)
+        ttk.Entry(parent, textvariable=variable).grid(row=row, column=column + 1, sticky="ew", padx=8, pady=6)
+        parent.columnconfigure(column + 1, weight=1)
+
+    def _hl_combo_row(
+        self,
+        parent: ttk.LabelFrame,
+        label: str,
+        variable: tk.StringVar,
+        values: tuple[str, ...],
+        row: int,
+        column: int,
+    ) -> None:
+        ttk.Label(parent, text=label).grid(row=row, column=column, sticky="w", padx=8, pady=6)
+        ttk.Combobox(parent, textvariable=variable, values=values, state="readonly").grid(
+            row=row,
+            column=column + 1,
+            sticky="ew",
+            padx=8,
+            pady=6,
+        )
+        parent.columnconfigure(column + 1, weight=1)
+
+    def _hl_check_row(
+        self,
+        parent: ttk.LabelFrame,
+        label: str,
+        variable: tk.BooleanVar,
+        row: int,
+        column: int,
+    ) -> None:
+        ttk.Checkbutton(parent, text=label, variable=variable).grid(
+            row=row,
+            column=column,
+            columnspan=2,
+            sticky="w",
+            padx=8,
+            pady=6,
+        )
+
+    def _hl_button(
+        self,
+        parent: ttk.LabelFrame,
+        text: str,
+        command: Callable[[], None],
+        row: int,
+        column: int,
+        columnspan: int = 1,
+    ) -> None:
+        ttk.Button(parent, text=text, command=command).grid(
+            row=row,
+            column=column,
+            columnspan=columnspan,
+            sticky="ew",
+            padx=6,
+            pady=4,
+        )
+
+    def _use_spot_mid(self) -> None:
+        self._use_hyperliquid_mid(self.spot_market.get(), self.spot_entry_limit)
+
+    def _use_perp_mid(self) -> None:
+        self._use_hyperliquid_mid(self.perp_coin.get(), self.perp_entry_limit)
+
+    def _use_hyperliquid_mid(self, raw_market: str, target_var: tk.StringVar) -> None:
+        market = raw_market.strip().upper()
+        if not market:
+            messagebox.showwarning("Use Mid", "Enter a Hyperliquid market / coin first.")
+            return
+
+        try:
+            all_mids = HyperliquidInfoClient().post_info({"type": "allMids"})
+            if not isinstance(all_mids, dict):
+                raise RuntimeError("Hyperliquid allMids returned an unexpected response.")
+
+            candidates = _hyperliquid_mid_candidates(market)
+            price = next((_to_float(all_mids.get(candidate)) for candidate in candidates if _to_float(all_mids.get(candidate)) is not None), None)
+
+            if price is None:
+                raise RuntimeError(f"No mid found for {market}. Tried: {', '.join(candidates)}")
+
+            target_var.set(_format_hyperliquid_price(price))
+        except Exception as exc:
+            messagebox.showerror("Hyperliquid mid failed", f"{type(exc).__name__}: {exc}")
+
+    def _apply_spot_size_percent(self, percent: int) -> None:
+        self.spot_size_status.set(
+            f"{percent}% selected. Size calculation will be wired after Hyperliquid balances are cached."
+        )
+
+    def _refresh_hyperliquid(self) -> None:
+        self._sync()
+        self._load_hyperliquid_open_orders()
+
+    def _load_hyperliquid_open_orders(self) -> None:
+        messagebox.showinfo(
+            "Hyperliquid open orders",
+            "Open-order loading should be wired in Commit 2 using the Hyperliquid info client and account-specific order cache.",
+        )
+
+    def _submit_spot_order(self, account_key: str) -> None:
+        self._hyperliquid_action_not_wired("submit spot order", account_key)
+
+    def _submit_perp_order(self, account_key: str) -> None:
+        self._hyperliquid_action_not_wired("submit perp order", account_key)
+
+    def _cancel_spot_order(self, account_key: str) -> None:
+        self._hyperliquid_action_not_wired("cancel spot order", account_key)
+
+    def _cancel_perp_order(self, account_key: str) -> None:
+        self._hyperliquid_action_not_wired("cancel perp order", account_key)
+
+    def _edit_selected_perp_position(self) -> None:
+        self._hyperliquid_action_not_wired("edit selected perp position", "selected account")
+
+    def _open_tpsl_orders(self) -> None:
+        self._hyperliquid_action_not_wired("open TP/SL orders", "selected account")
+
+    def _hyperliquid_action_not_wired(self, action: str, account_key: str) -> None:
+        messagebox.showinfo(
+            "Hyperliquid action not wired yet",
+            (
+                f"{action} for {account_key} is in the UI now, but live routing is not connected yet.\n\n"
+                "Next step: port HyperliquidExecutionAdapter from portfolio-risk-cockpit and wire this button through "
+                "a confirmation + live-order gate."
+            ),
+        )
+
+    def _use_selected_hyperliquid_holding(self, _event: object) -> None:
+        if self.holdings_table is None:
+            return
+
+        selected = self.holdings_table.selection()
+        if not selected:
+            return
+
+        values = self.holdings_table.item(selected[0], "values")
+        if len(values) < 3:
+            return
+
+        bucket = str(values[1]).strip().upper()
+        symbol = str(values[2]).strip().upper()
+
+        if not symbol:
+            return
+
+        if bucket == "SPOT":
+            self.spot_market.set(_hyperliquid_display_symbol(symbol))
+        elif bucket == "PERPS":
+            self.perp_coin.set(_hyperliquid_display_symbol(symbol))
+
+    def _use_selected_hyperliquid_order(self, _event: object) -> None:
+        if self.hyperliquid_open_orders_table is None:
+            return
+
+        selected = self.hyperliquid_open_orders_table.selection()
+        if not selected:
+            return
+
+        values = self.hyperliquid_open_orders_table.item(selected[0], "values")
+        if len(values) < 3:
+            return
+
+        order_id = str(values[1])
+        coin = str(values[2])
+        self.spot_cancel_order_id.set(order_id)
+        self.perp_cancel_order_id.set(order_id)
+        self.spot_market.set(coin)
+        self.perp_coin.set(coin)
+
+
+def _hyperliquid_mid_candidates(market: str) -> tuple[str, ...]:
+    clean = _hyperliquid_display_symbol(market)
+    candidates = [
+        market.strip().upper(),
+        clean,
+        f"{clean}/USDC",
+        f"U{clean}/USDC",
+        f"{clean}-PERP",
+    ]
+
+    if clean.startswith("U") and len(clean) > 1:
+        candidates.append(f"{clean[1:]}/USDC")
+
+    return tuple(_dedupe_strings([candidate for candidate in candidates if candidate]))
+
+
+def _hyperliquid_display_symbol(symbol: str) -> str:
+    clean = symbol.strip().upper()
+
+    for suffix in ("-PERP-SHORT", "-PERP", "-SPOT"):
+        if clean.endswith(suffix):
+            clean = clean[: -len(suffix)]
+
+    if "/" in clean:
+        clean = clean.split("/", 1)[0]
+
+    return clean
+
+
+def _format_hyperliquid_price(value: float) -> str:
+    return f"{value:.8f}".rstrip("0").rstrip(".")
+
+
+def _dedupe_strings(values: list[str]) -> list[str]:
+    result: list[str] = []
+
+    for value in values:
+        if value not in result:
+            result.append(value)
+
+    return result
 
 
 def _pnl_row_tag(*values: float | None) -> tuple[str, ...]:
