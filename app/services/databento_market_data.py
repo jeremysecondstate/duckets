@@ -49,7 +49,7 @@ class DatabentoMarketDataProvider:
 
         import databento as db
 
-        end_time = end or datetime.now(timezone.utc)
+        end_time = end or _default_databento_end_time()
         if end_time.tzinfo is None:
             end_time = end_time.replace(tzinfo=timezone.utc)
 
@@ -132,7 +132,7 @@ class DatabentoMarketDataProvider:
 
         import databento as db
 
-        end_time = end or datetime.now(timezone.utc)
+        end_time = end or _default_databento_end_time()
         if end_time.tzinfo is None:
             end_time = end_time.replace(tzinfo=timezone.utc)
 
@@ -332,6 +332,15 @@ def _float(value: Any) -> float | None:
         return None if value in (None, "") else float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _default_databento_end_time() -> datetime:
+    configured = os.getenv("DATABENTO_EQUITIES_QUERY_END_UTC", "").strip()
+    if configured:
+        parsed = datetime.fromisoformat(configured.replace("Z", "+00:00"))
+        return parsed.astimezone(timezone.utc) if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+    return datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
 
 
 def _symbol(value: str) -> str:
