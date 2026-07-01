@@ -999,6 +999,8 @@ class HyperliquidDucketsTab(DucketsTab):
         self.perp_attach_tpsl = tk.BooleanVar(value=False)
         self.perp_fee_rate = tk.StringVar(value="0.045")
         self.perp_cancel_order_id = tk.StringVar()
+        self.hyperliquid_open_order_by_lookup_key: dict[str, dict[str, object]] = {}
+        self.selected_hyperliquid_order_key = ""
 
         self.latest_hyperliquid_bucket: DucketBucketSnapshot | None = None
         self.hyperliquid_open_orders_table: ttk.Treeview | None = None
@@ -1080,7 +1082,8 @@ class HyperliquidDucketsTab(DucketsTab):
         self._hl_button(actions, "Submit Order Jeremy", lambda: self._submit_spot_order("jeremy"), 0, 1)
         self._hl_button(actions, "Cancel Order Alex", lambda: self._cancel_spot_order("alex"), 1, 0)
         self._hl_button(actions, "Cancel Order Jeremy", lambda: self._cancel_spot_order("jeremy"), 1, 1)
-        self._hl_button(actions, "Refresh Balances / Open Orders", self._refresh_hyperliquid, 2, 0, columnspan=2)
+        self._hl_button(actions, "Edit Selected Order", self._edit_selected_hyperliquid_open_order, 2, 0, columnspan=2)
+        self._hl_button(actions, "Refresh Balances / Open Orders", self._refresh_hyperliquid, 3, 0, columnspan=2)
 
     def _build_perp_ticket(self, parent: ttk.Frame) -> None:
         ticket = ttk.LabelFrame(parent, text="Hyperliquid Perp Ticket")
@@ -1144,6 +1147,7 @@ class HyperliquidDucketsTab(DucketsTab):
         self._setup_column(self.hyperliquid_open_orders_table, "reduce_only", "Reduce", 80)
         self.hyperliquid_open_orders_table.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
         self.hyperliquid_open_orders_table.bind("<<TreeviewSelect>>", self._use_selected_hyperliquid_order)
+        self.hyperliquid_open_orders_table.bind("<Double-1>", self._edit_selected_hyperliquid_open_order)
 
     def _hyperliquid_account_snapshot(self, account_key: str) -> PortfolioSnapshot:
         bucket = self.latest_hyperliquid_bucket
@@ -1317,8 +1321,14 @@ class HyperliquidDucketsTab(DucketsTab):
             return
 
         self._clear_table(self.hyperliquid_open_orders_table)
+        self.hyperliquid_open_order_by_lookup_key = {}
 
         errors: list[str] = []
+
+        try:
+            spot_meta_and_asset_ctxs = HyperliquidInfoClient().post_info({"type": "spotMetaAndAssetCtxs"})
+        except Exception:
+            spot_meta_and_asset_ctxs = None
 
         for account_key in ("alex", "jeremy"):
             try:
@@ -1329,6 +1339,9 @@ class HyperliquidDucketsTab(DucketsTab):
 
             for order in orders:
                 lookup_key = _hyperliquid_open_order_lookup_key(order)
+                raw_coin = str(order.get("coin") or "")
+                display_coin = _hyperliquid_display_open_order_coin(raw_coin, spot_meta_and_asset_ctxs)
+
                 self.hyperliquid_open_orders_table.insert(
                     "",
                     tk.END,
@@ -1336,7 +1349,7 @@ class HyperliquidDucketsTab(DucketsTab):
                     values=(
                         order.get("accountLabel") or account_key.title(),
                         order.get("oid") or "",
-                        order.get("coin") or "",
+                        display_coin,
                         _hyperliquid_order_side(order),
                         order.get("sz") or "",
                         order.get("limitPx") or order.get("price") or "",
@@ -1459,10 +1472,77 @@ class HyperliquidDucketsTab(DucketsTab):
             messagebox.showerror("Hyperliquid perp cancel failed", f"{type(exc).__name__}: {exc}")
 
     def _edit_selected_perp_position(self) -> None:
-        self._hyperliquid_action_not_wired("edit selected perp position", "selected account")
+        self._edit_selected_hyperliquid_open_order()
 
     def _open_tpsl_orders(self) -> None:
         self._hyperliquid_action_not_wired("open TP/SL orders", "selected account")
+
+    def _edit_selected_hyperliquid_open_order(self, _event: object | None = None) -> None:
+        order = self._selected_hyperliquid_order()
+        if order is None:
+            messagebox.showinfo("Edit Hyperliquid order", "Select an open order first.")
+            return
+
+        account_key = str(order.get("accountKey") or "").strip().lower()
+        account_label = str(order.get("accountLabel") or account_key.title())
+        raw_coin = str(order.get("coin") or "")
+        order_id = _positive_int(order.get("oid"), "Order ID")
+
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Edit Hyperliquid Open Order")
+        dialog.transient(self.root)
+        dialog.resizable(False, False)
+
+        body = ttk.Frame(dialog, padding=14)
+        body.pack(fill=tk.BOTH, expand=True)
+
+        size_var = tk.StringVar(value=str(order.get("sz") or ""))
+        price_var = tk.StringVar(value=str(order.get("limitPx") or order.get("price") or ""))
+        side = _hyperliquid_order_side(order).lower()
+        is_buy = side in {"b", "buy"}
+        reduce_only = bool(_to_bool(order.get("reduceOnly")))
+
+        ttk.Label(body, text=f"Account: {account_label}").grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 6))
+        ttk.Label(body, text=f"Coin: {raw_coin}").grid(row=1, column=0, columnspan=2, sticky="w", pady=(0, 6))
+        ttk.Label(body, text=f"Order ID: {order_id}").grid(row=2, column=0, columnspan=2, sticky="w", pady=(0, 12))
+
+        ttk.Label(body, text="New size").grid(row=3, column=0, sticky="w", padx=(0, 8), pady=6)
+        ttk.Entry(body, textvariable=size_var, width=24).grid(row=3, column=1, sticky="ew", pady=6)
+
+        ttk.Label(body, text="New price").grid(row=4, column=0, sticky="w", padx=(0, 8), pady=6)
+        ttk.Entry(body, textvariable=price_var, width=24).grid(row=4, column=1, sticky="ew", pady=6)
+
+        def submit_edit() -> None:
+            try:
+                ticket = HyperliquidOrderTicket(
+                    coin=raw_coin,
+                    is_buy=is_buy,
+                    size=_required_float(size_var.get(), "New size"),
+                    limit_price=_required_float(price_var.get(), "New price"),
+                    tif=str(order.get("tif") or order.get("timeInForce") or "Gtc"),
+                    reduce_only=reduce_only,
+                )
+
+                if not messagebox.askyesno(
+                    "Confirm Hyperliquid Edit",
+                    _hyperliquid_order_confirmation_message(account_key, ticket),
+                ):
+                    return
+
+                result = HyperliquidExecutionAdapter(account_key).modify_order(order_id, ticket)
+                dialog.destroy()
+                self._load_hyperliquid_open_orders()
+                messagebox.showinfo("Hyperliquid order edited", f"Response:\n{result}")
+            except Exception as exc:
+                messagebox.showerror("Hyperliquid edit failed", f"{type(exc).__name__}: {exc}")
+
+        ttk.Button(body, text="Submit Edit", command=submit_edit).grid(
+            row=5,
+            column=0,
+            columnspan=2,
+            sticky="ew",
+            pady=(12, 0),
+        )
 
     def _hyperliquid_action_not_wired(self, action: str, account_key: str) -> None:
         messagebox.showinfo(
@@ -1505,23 +1585,120 @@ class HyperliquidDucketsTab(DucketsTab):
         if not selected:
             return
 
-        values = self.hyperliquid_open_orders_table.item(selected[0], "values")
+        lookup_key = str(selected[0])
+        values = self.hyperliquid_open_orders_table.item(lookup_key, "values")
         if len(values) < 3:
             return
 
+        self.selected_hyperliquid_order_key = lookup_key
+
         account = str(values[0])
         order_id = str(values[1])
-        coin = str(values[2])
+        display_coin = str(values[2])
 
         self.spot_cancel_order_id.set(order_id)
         self.perp_cancel_order_id.set(order_id)
-        self.spot_market.set(coin)
-        self.perp_coin.set(coin)
+        self.spot_market.set(display_coin)
+        self.perp_coin.set(display_coin)
 
-        messagebox.showinfo(
-            "Hyperliquid order selected",
-            f"Selected {account} order {order_id} for {coin}.",
-        )
+    def _selected_hyperliquid_order(self) -> dict[str, object] | None:
+        if not self.selected_hyperliquid_order_key:
+            return None
+
+        order = self.hyperliquid_open_order_by_lookup_key.get(self.selected_hyperliquid_order_key)
+        return order if isinstance(order, dict) else None
+
+
+def _hyperliquid_display_open_order_coin(raw_coin: str, spot_meta_and_asset_ctxs: object) -> str:
+    coin = raw_coin.strip().upper()
+
+    if not coin.startswith("@"):
+        return coin
+
+    market_index = _int_from_at_market(coin)
+    if market_index is None:
+        return coin
+
+    market = _spot_market_label_from_meta(market_index, spot_meta_and_asset_ctxs)
+    return market or coin
+
+
+def _int_from_at_market(value: str) -> int | None:
+    cleaned = value.strip()
+    if not cleaned.startswith("@"):
+        return None
+
+    try:
+        return int(cleaned[1:])
+    except ValueError:
+        return None
+
+
+def _spot_market_label_from_meta(market_index: int, spot_meta_and_asset_ctxs: object) -> str:
+    if not isinstance(spot_meta_and_asset_ctxs, list) or not spot_meta_and_asset_ctxs:
+        return ""
+
+    meta = spot_meta_and_asset_ctxs[0]
+    if not isinstance(meta, dict):
+        return ""
+
+    universe = meta.get("universe")
+    tokens = meta.get("tokens")
+
+    if not isinstance(universe, list):
+        return ""
+
+    token_names_by_index = _spot_token_names_by_index(tokens)
+
+    for index, asset in enumerate(universe):
+        if not isinstance(asset, dict):
+            continue
+
+        asset_index = _to_int_or_none(asset.get("index"))
+
+        if market_index not in {index, 10000 + index, asset_index, None if asset_index is None else 10000 + asset_index}:
+            continue
+
+        token_indices = asset.get("tokens")
+        if isinstance(token_indices, list) and len(token_indices) >= 2:
+            base = token_names_by_index.get(_to_int_or_none(token_indices[0]), "")
+            quote = token_names_by_index.get(_to_int_or_none(token_indices[1]), "USDC")
+
+            if base:
+                return f"{base}/{quote or 'USDC'}"
+
+        name = str(asset.get("name") or "").strip().upper()
+        if name and not name.startswith("@"):
+            return name
+
+    return ""
+
+
+def _spot_token_names_by_index(tokens: object) -> dict[int | None, str]:
+    result: dict[int | None, str] = {}
+
+    if not isinstance(tokens, list):
+        return result
+
+    for index, token in enumerate(tokens):
+        if not isinstance(token, dict):
+            continue
+
+        token_index = _to_int_or_none(token.get("index"))
+        name = str(token.get("name") or token.get("token") or token.get("coin") or "").strip().upper()
+
+        if name:
+            result[index] = name
+            result[token_index] = name
+
+    return result
+
+
+def _to_int_or_none(value: object) -> int | None:
+    try:
+        return int(str(value))
+    except (TypeError, ValueError):
+        return None
 
 
 def _hyperliquid_mid_candidates(market: str) -> tuple[str, ...]:

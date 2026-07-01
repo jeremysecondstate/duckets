@@ -152,6 +152,16 @@ class HyperliquidExecutionAdapter:
             if isinstance(order, dict)
         ]
 
+    def modify_order(self, order_id: int, ticket: HyperliquidOrderTicket) -> Any:
+        normalized_ticket = normalize_hyperliquid_ticket_for_wire(ticket)
+        config = self.config()
+        config.validate_for_live_order(normalized_ticket)
+
+        if order_id <= 0:
+            raise ValueError("Hyperliquid edit requires a positive order ID.")
+
+        return self._local_signed_modify(order_id, normalized_ticket, config)
+
     def submit(self, ticket: HyperliquidOrderTicket) -> Any:
         normalized_ticket = normalize_hyperliquid_ticket_for_wire(ticket)
         config = self.config()
@@ -214,6 +224,34 @@ class HyperliquidExecutionAdapter:
         )
 
         return exchange.cancel(coin, order_id)
+
+    def _local_signed_modify(
+        self,
+        order_id: int,
+        ticket: HyperliquidOrderTicket,
+        config: HyperliquidTradingConfig,
+    ) -> Any:
+        from eth_account import Account
+        from hyperliquid.exchange import Exchange
+        from hyperliquid.utils import constants
+
+        api_wallet = Account.from_key(config.api_secret)
+        exchange = Exchange(
+            api_wallet,
+            constants.MAINNET_API_URL,
+            account_address=config.wallet_address,
+        )
+        normalized_ticket = normalize_hyperliquid_ticket_size_for_exchange(ticket, exchange)
+
+        return exchange.modify_order(
+            order_id,
+            normalized_ticket.coin,
+            normalized_ticket.is_buy,
+            normalized_ticket.size,
+            normalized_ticket.limit_price,
+            normalized_ticket.order_type_payload(),
+            reduce_only=normalized_ticket.reduce_only,
+        )
 
 
 def normalize_hyperliquid_ticket_for_wire(ticket: HyperliquidOrderTicket) -> HyperliquidOrderTicket:
