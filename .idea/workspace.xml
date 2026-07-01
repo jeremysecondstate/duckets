@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add editing functionality for Hyperliquid open orders: UI enhancements, order modification handling, and display improvements for coin data.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/ui/ducket_bucket.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ui/ducket_bucket.py" afterDir="false" />
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add &quot;Kind&quot; column and functionality to distinguish Spot vs. Perp orders in Hyperliquid open orders panel: Includes UI updates, order kind detection, and handling improvements">
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,61 +46,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="7.015811430307821E-7" />
-      <entry key="MS500" value="0.09573465353568181" />
-      <entry key="S2" value="2.0532766478455304" />
-      <entry key="S5" value="4.567136070359652" />
-      <entry key="S10" value="6.209818810380841" />
-      <entry key="S30" value="7.864630995730706" />
-      <entry key="S60" value="8.398390643436638" />
-      <entry key="M2" value="8.689910596761335" />
-      <entry key="M5" value="8.89484380616798" />
-      <entry key="M10" value="9.142505976259054" />
-      <entry key="M15" value="9.397122823625017" />
-      <entry key="M30" value="9.916380192110068" />
-      <entry key="H1" value="10.358820379831608" />
-      <entry key="H2" value="10.679881517180384" />
-      <entry key="H4" value="11.81096023980804" />
-      <entry key="D1" value="48.335772811315024" />
-      <entry key="W1" value="115.032738320272" />
+      <entry key="MS100" value="1.0016315421540456" />
+      <entry key="MS500" value="1.3321770242343973" />
+      <entry key="S2" value="2.2101210123846218" />
+      <entry key="S5" value="2.62798863251562" />
+      <entry key="S10" value="2.802967772986971" />
+      <entry key="S30" value="2.9316902391005635" />
+      <entry key="S60" value="2.9655039669408882" />
+      <entry key="M2" value="2.982665758166333" />
+      <entry key="M5" value="2.993045487989537" />
+      <entry key="M10" value="2.996519264629109" />
+      <entry key="M15" value="2.9976787358064287" />
+      <entry key="M30" value="2.998838980741392" />
+      <entry key="H1" value="2.999419393920201" />
+      <entry key="H2" value="2.999773960717143" />
+      <entry key="H4" value="3.0288327678555693" />
+      <entry key="D1" value="20.751366295632412" />
+      <entry key="W1" value="102.69500553614917" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0" />
-      <entry key="S60" value="1.0" />
-      <entry key="M2" value="1.0" />
-      <entry key="M5" value="1.0" />
-      <entry key="M10" value="1.0" />
-      <entry key="M15" value="1.0" />
-      <entry key="M30" value="1.0000000000003952" />
-      <entry key="H1" value="1.000000628773498" />
-      <entry key="H2" value="1.0008011578014393" />
-      <entry key="H4" value="1.0321316887511152" />
-      <entry key="D1" value="2.607088789206969" />
-      <entry key="W1" value="5.201383009663424" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="5.941168865E-314" />
+      <entry key="M5" value="5.1232878658382707E-126" />
+      <entry key="M10" value="2.2634681057700527E-63" />
+      <entry key="M15" value="1.7239166049687787E-42" />
+      <entry key="M30" value="1.3129800474379423E-21" />
+      <entry key="H1" value="3.62350893275021E-11" />
+      <entry key="H2" value="6.024379620671584E-6" />
+      <entry key="H4" value="0.002532312961293744" />
+      <entry key="D1" value="0.9574575609603669" />
+      <entry key="W1" value="4.507863878535147" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.004072797991556494" />
-      <entry key="MS500" value="0.42317610076335654" />
-      <entry key="S2" value="2.7852389560566033" />
-      <entry key="S5" value="5.4414909347557385" />
-      <entry key="S10" value="7.142464953596385" />
-      <entry key="S30" value="8.840818975890542" />
-      <entry key="S60" value="9.386274518433032" />
-      <entry key="M2" value="9.683795649843038" />
-      <entry key="M5" value="9.892334022327807" />
-      <entry key="M10" value="10.141032417844949" />
-      <entry key="M15" value="10.395957715665524" />
-      <entry key="M30" value="10.915602991706555" />
-      <entry key="H1" value="11.358348067799186" />
-      <entry key="H2" value="11.680418019815074" />
-      <entry key="H4" value="12.842945754381756" />
-      <entry key="D1" value="50.942785391900934" />
-      <entry key="W1" value="120.23409893281915" />
+      <entry key="MS100" value="0.8841632427488799" />
+      <entry key="MS500" value="1.2996505603882895" />
+      <entry key="S2" value="2.1958759009477498" />
+      <entry key="S5" value="2.621061648692297" />
+      <entry key="S10" value="2.799243370144594" />
+      <entry key="S30" value="2.930384420685105" />
+      <entry key="S60" value="2.9648425816360953" />
+      <entry key="M2" value="2.9823329127046976" />
+      <entry key="M5" value="2.9929118287469754" />
+      <entry key="M10" value="2.9964523477970406" />
+      <entry key="M15" value="2.997634105177541" />
+      <entry key="M30" value="2.9988166557163516" />
+      <entry key="H1" value="2.999408229014966" />
+      <entry key="H2" value="2.9997744004255362" />
+      <entry key="H4" value="3.031361930490726" />
+      <entry key="D1" value="21.708795403550916" />
+      <entry key="W1" value="107.20284993738389" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -144,6 +145,9 @@
       <recent name="C:\dev\duckets\app\services" />
       <recent name="C:\dev\duckets" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\dev\duckets\app\services" />
+    </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -163,7 +167,7 @@
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
       <workItem from="1782492563563" duration="40000000" />
-      <workItem from="1782771585947" duration="18649000" />
+      <workItem from="1782771585947" duration="24700000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -477,14 +481,21 @@
       <option name="project" value="LOCAL" />
       <updated>1782876393826</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="Add &quot;Kind&quot; column and functionality to distinguish Spot vs. Perp orders in Hyperliquid open orders panel: Includes UI updates, order kind detection, and handling improvements">
+      <option name="closed" value="true" />
+      <created>1782885029465</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1782885029465</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add dark Ducket Bucket theme" />
     <MESSAGE value="Make Ducket Bucket sections resizable" />
     <MESSAGE value="Add Schwab and Hyperliquid Duckets tabs" />
     <MESSAGE value="fixed _build_layout() inner method bug!" />
@@ -509,7 +520,8 @@
     <MESSAGE value="Add Hyperliquid trading integration: Order ticket classes, execution adapters, and support for spot and perp order submission, cancellation, and open orders loading. normalize_hyperliquid_limit_price unresolved reference in ducket_bucket.py" />
     <MESSAGE value="Resolve unresolved reference for `normalize_hyperliquid_limit_price` in `ducket_bucket.py`" />
     <MESSAGE value="Add editing functionality for Hyperliquid open orders: UI enhancements, order modification handling, and display improvements for coin data." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add editing functionality for Hyperliquid open orders: UI enhancements, order modification handling, and display improvements for coin data." />
+    <MESSAGE value="Add &quot;Kind&quot; column and functionality to distinguish Spot vs. Perp orders in Hyperliquid open orders panel: Includes UI updates, order kind detection, and handling improvements" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add &quot;Kind&quot; column and functionality to distinguish Spot vs. Perp orders in Hyperliquid open orders panel: Includes UI updates, order kind detection, and handling improvements" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
