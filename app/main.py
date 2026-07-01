@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-import sys
 import argparse
+import sys
 
 from app.services.aggregate import DucketBucketSnapshot
-from app.services.hyperliquid import sync_hyperliquid_portfolios
-from app.services.schwab import SchwabSession, sync_schwab_portfolio
-from app.ui.ducket_bucket import run_ducket_bucket_ui
-
-from app.services.market_fetch_specs import databento_resample_frequencies
 from app.services.databento_market_data import DatabentoMarketDataProvider
+from app.services.hyperliquid import sync_hyperliquid_portfolios
 from app.services.market_parquet_store import MarketParquetStore
+from app.services.schwab import SchwabSession, sync_schwab_portfolio
 from app.services.schwab_market_data import SchwabMarketDataProvider
+from app.ui.ducket_bucket import run_ducket_bucket_ui
 
 
 def main() -> None:
@@ -179,92 +177,138 @@ def _fetch_all_databento_market_data(symbol: str, store: MarketParquetStore) -> 
     provider = DatabentoMarketDataProvider()
 
     print()
-    print("Databento bars")
-    print("--------------")
+    print("Databento native bars")
+    print("---------------------")
+    print(f"Dataset: {provider.dataset}")
+    print(f"Native schemas: {', '.join(provider.native_schemas) or '--'}")
 
-    for window_spec, raw_frame, exc in provider.fetch_all_bar_frames(symbol):
+    native_bars_by_schema = {}
+    all_native_bars = []
+
+    for spec, bars, raw_frame, available_range, exc in provider.fetch_all_native_bars(symbol):
         metadata = {
             "provider_dataset": provider.dataset,
-            "provider_schema": provider.schema,
-            "lookback_minutes": window_spec.lookback_minutes,
-            "window_key": window_spec.key,
+            "source_schema": spec.schema,
+            "source_frequency": spec.frequency,
+            "output_frequency": spec.frequency,
+            "aggregation_method": "native",
         }
+        if available_range is not None:
+            metadata.update(
+                {
+                    "range_start": available_range.start.isoformat(),
+                    "range_end": available_range.end.isoformat(),
+                }
+            )
+
+        request_key = f"{spec.key}_{spec.schema}_{spec.frequency}"
 
         if exc is not None:
             error_path = store.save_error(
                 source="databento",
                 category="bars",
                 symbol=symbol,
-                request_key=window_spec.key,
+                request_key=request_key,
                 error_type=type(exc).__name__,
                 error_message=str(exc),
                 metadata=metadata,
             )
-            print(f"{window_spec.key}: ERROR -> {error_path}")
+            print(f"{request_key}: ERROR -> {error_path}")
             continue
 
-        if raw_frame is None:
-            continue
+        if raw_frame is not None:
+            raw_path = store.save_raw_frame(
+                source="databento",
+                category="bars",
+                symbol=symbol,
+                endpoint=f"{request_key}_raw",
+                frame=raw_frame,
+            )
+        else:
+            raw_path = None
 
-        raw_path = store.save_raw_frame(
-            source="databento",
-            category="bars",
-            symbol=symbol,
-            endpoint=f"{window_spec.key}_native_{provider.dataset}_{provider.schema}",
-            frame=raw_frame,
+        bars_path = store.save_bars(
+            "databento",
+            symbol,
+            spec.frequency,
+            bars,
+            request_key=request_key,
+            metadata=metadata,
         )
-        print(f"{window_spec.key}: raw rows {len(raw_frame)} -> {raw_path or '--'}")
+        native_bars_by_schema[spec.schema] = bars
+        all_native_bars.extend(bars)
 
-        for frequency in databento_resample_frequencies():
-            request_key = f"{window_spec.key}_{frequency}"
-            try:
-                bars = provider.normalized_bars_from_frame(
-                    symbol,
-                    raw_frame,
-                    window_key=window_spec.key,
-                    frequency=frequency,
-                )
-                bars_path = store.save_bars(
-                    "databento",
-                    symbol,
-                    request_key,
-                    bars,
-                    request_key=request_key,
-                    metadata={**metadata, "output_frequency": frequency},
-                )
-                print(f"{request_key}: {len(bars)} bars -> {bars_path or '--'}")
-            except Exception as frequency_exc:
-                error_path = store.save_error(
-                    source="databento",
-                    category="bars",
-                    symbol=symbol,
-                    request_key=request_key,
-                    error_type=type(frequency_exc).__name__,
-                    error_message=str(frequency_exc),
-                    metadata={**metadata, "output_frequency": frequency},
-                )
-                print(f"{request_key}: ERROR -> {error_path}")
+        print(f"{request_key}: {len(bars)} bars -> {bars_path or '--'} | raw -> {raw_path or '--'}")
+
+    print()
+    print("Databento derived bars")
+    print("----------------------")
+
+    for spec in provider.derived_specs():
+        source_bars = native_bars_by_schema.get(spec.source_schema, [])
+        metadata = {
+            "provider_dataset": provider.dataset,
+            "source_schema": spec.source_schema,
+            "source_frequency": spec.source_frequency,
+            "output_frequency": spec.output_frequency,
+            "aggregation_method": spec.aggregation_method,
+        }
+        request_key = f"{spec.key}_{spec.source_schema}_{spec.output_frequency}"
+
+        if not source_bars:
+            error_path = store.save_error(
+                source="databento",
+                category="bars",
+                symbol=symbol,
+                request_key=request_key,
+                error_type="MissingSourceBars",
+                error_message=f"No native {spec.source_schema} bars were available for derived {spec.output_frequency}.",
+                metadata=metadata,
+            )
+            print(f"{request_key}: ERROR -> {error_path}")
+            continue
+
+        try:
+            bars = provider.derive_bars(symbol, source_bars, spec)
+            bars_path = store.save_bars(
+                "databento",
+                symbol,
+                spec.output_frequency,
+                bars,
+                request_key=request_key,
+                metadata=metadata,
+            )
+            print(f"{request_key}: {len(bars)} bars -> {bars_path or '--'}")
+        except Exception as exc:
+            error_path = store.save_error(
+                source="databento",
+                category="bars",
+                symbol=symbol,
+                request_key=request_key,
+                error_type=type(exc).__name__,
+                error_message=str(exc),
+                metadata=metadata,
+            )
+            print(f"{request_key}: ERROR -> {error_path}")
 
     print()
     print("Databento latest-price parquet")
     print("------------------------------")
-    try:
-        quote, raw_frame = provider.fetch_latest_price(symbol)
-        if quote is not None:
-            quote_path = store.save_quote(quote)
-            print(f"latest price from latest bar close -> {quote_path}")
-        else:
-            print("latest price unavailable")
-    except Exception as exc:
+    quote = provider.quote_from_latest_bar(symbol, all_native_bars)
+    if quote is None:
         error_path = store.save_error(
             source="databento",
             category="quotes",
             symbol=symbol,
-            request_key="latest_price_from_ohlcv",
-            error_type=type(exc).__name__,
-            error_message=str(exc),
+            request_key="latest_price_from_native_ohlcv",
+            error_type="MissingSourceBars",
+            error_message="No native Databento bars were available to derive latest price.",
         )
         print(f"latest-price error: {error_path}")
+        return
+
+    quote_path = store.save_quote(quote)
+    print(f"latest price from latest native bar close -> {quote_path}")
 
 
 if __name__ == "__main__":
