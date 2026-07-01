@@ -157,6 +157,36 @@ class SchwabSession:
         self.access_token_expires_at = cached_access_token_expires_at(cached_payload)
         self.refresh_token = str(payload.get("refresh_token") or previous_refresh_token or "")
 
+    def get_price_history(
+        self,
+        symbol: str,
+        *,
+        period_type: str = "year",
+        period: int = 1,
+        frequency_type: str = "daily",
+        frequency: int = 1,
+        need_extended_hours_data: bool = False,
+    ) -> Any:
+        cleaned_symbol = symbol.strip().upper()
+        if not cleaned_symbol:
+            raise ValueError("Symbol is required for price history.")
+
+        response = requests.get(
+            f"{MARKETDATA_BASE_URL}/pricehistory",
+            headers=self._headers(),
+            params={
+                "symbol": cleaned_symbol,
+                "periodType": period_type,
+                "period": period,
+                "frequencyType": frequency_type,
+                "frequency": frequency,
+                "needExtendedHoursData": str(need_extended_hours_data).lower(),
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
+        return response.json()
+
     def get_open_orders(self) -> Any:
         now = datetime.now(timezone.utc)
         return self.get_orders(

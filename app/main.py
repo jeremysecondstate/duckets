@@ -7,14 +7,18 @@ from app.services.aggregate import DucketBucketSnapshot
 from app.services.hyperliquid import sync_hyperliquid_portfolios
 from app.services.schwab import SchwabSession, sync_schwab_portfolio
 from app.ui.ducket_bucket import run_ducket_bucket_ui
-from app.services.market_fetch_specs import databento_resample_frequencies
 
+from app.services.market_fetch_specs import databento_resample_frequencies
 from app.services.databento_market_data import DatabentoMarketDataProvider
 from app.services.market_parquet_store import MarketParquetStore
 from app.services.schwab_market_data import SchwabMarketDataProvider
 
 
 def main() -> None:
+    if len(sys.argv) > 1 and sys.argv[1] == "market-fetch-all":
+        _run_market_fetch_all(sys.argv[2:])
+        return
+
     if len(sys.argv) > 1 and sys.argv[1] == "schwab-auth":
         session = SchwabSession()
         authorization_url, _state = session.build_authorization_url()
