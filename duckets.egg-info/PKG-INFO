@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: duckets
+Version: 0.1.0
+Requires-Python: >=3.11
+Requires-Dist: python-dotenv>=1.0.1
+Requires-Dist: requests>=2.32.3
+Requires-Dist: hyperliquid-python-sdk>=0.16.0
+Requires-Dist: eth-account>=0.13.0
+Requires-Dist: databento
+Requires-Dist: pandas>=2.2.0
+Requires-Dist: pyarrow>=16.0.0

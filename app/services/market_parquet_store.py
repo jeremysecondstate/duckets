@@ -11,7 +11,7 @@ import pandas as pd
 
 from app.models.market_data import MarketBar, MarketQuote
 
-DEFAULT_OHLCV_PARQUET_DIR = Path(r"I:\My Drive\PRC\OHLCV")
+DEFAULT_OHLCV_PARQUET_DIR = Path(r"C:\dev\duckets\analysis")
 
 
 class MarketParquetStore:

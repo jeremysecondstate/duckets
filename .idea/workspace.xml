@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Refactor Databento market data end time handling: Introduce `_default_databento_end_time` helper for environment-based default values and consistency.">
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add new Databento environment variables for fetch cost limits, range settings, and native schemas">
       <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/market_parquet_store.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/market_parquet_store.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -167,7 +168,7 @@
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
       <workItem from="1782492563563" duration="40000000" />
-      <workItem from="1782771585947" duration="28648000" />
+      <workItem from="1782771585947" duration="29607000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -537,14 +538,21 @@
       <option name="project" value="LOCAL" />
       <updated>1782945031360</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="Add new Databento environment variables for fetch cost limits, range settings, and native schemas">
+      <option name="closed" value="true" />
+      <created>1782945855196</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1782945855196</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Make Schwab order actions vertically resizable" />
     <MESSAGE value="Use Schwab ticket field mappings" />
     <MESSAGE value="removed " />
     <MESSAGE value="Remove redundant Schwab ticket field initializations" />
@@ -569,10 +577,11 @@
     <MESSAGE value=".gitignore update removing scratch file" />
     <MESSAGE value="Remove scratch Databento parquet file reader script" />
     <MESSAGE value="Refactor Databento market data end time handling: Introduce `_default_databento_end_time` helper for environment-based default values and consistency." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor Databento market data end time handling: Introduce `_default_databento_end_time` helper for environment-based default values and consistency." />
+    <MESSAGE value="Add new Databento environment variables for fetch cost limits, range settings, and native schemas" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add new Databento environment variables for fetch cost limits, range settings, and native schemas" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/duckets$inspect_parquets.coverage" NAME="inspect_parquets Coverage Results" MODIFIED="1782944604959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scratch" />
+    <SUITE FILE_PATH="coverage/duckets$inspect_parquets.coverage" NAME="inspect_parquets Coverage Results" MODIFIED="1782946781052" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scratch" />
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
   </component>
 </project>
