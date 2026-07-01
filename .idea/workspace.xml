@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Remove scratch Databento parquet file reader script">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/databento_market_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/databento_market_data.py" afterDir="false" />
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Refactor Databento market data end time handling: Introduce `_default_databento_end_time` helper for environment-based default values and consistency.">
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -168,7 +167,7 @@
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
       <workItem from="1782492563563" duration="40000000" />
-      <workItem from="1782771585947" duration="27846000" />
+      <workItem from="1782771585947" duration="28648000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -530,14 +529,21 @@
       <option name="project" value="LOCAL" />
       <updated>1782944470227</updated>
     </task>
-    <option name="localTasksCounter" value="46" />
+    <task id="LOCAL-00046" summary="Refactor Databento market data end time handling: Introduce `_default_databento_end_time` helper for environment-based default values and consistency.">
+      <option name="closed" value="true" />
+      <created>1782945031360</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1782945031360</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add Schwab Duckets order panels" />
     <MESSAGE value="Make Schwab order actions vertically resizable" />
     <MESSAGE value="Use Schwab ticket field mappings" />
     <MESSAGE value="removed " />
@@ -562,7 +568,8 @@
     <MESSAGE value="Add Databento parquet file reader script and re-add refactored Schwab price history fetching method" />
     <MESSAGE value=".gitignore update removing scratch file" />
     <MESSAGE value="Remove scratch Databento parquet file reader script" />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove scratch Databento parquet file reader script" />
+    <MESSAGE value="Refactor Databento market data end time handling: Introduce `_default_databento_end_time` helper for environment-based default values and consistency." />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor Databento market data end time handling: Introduce `_default_databento_end_time` helper for environment-based default values and consistency." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$inspect_parquets.coverage" NAME="inspect_parquets Coverage Results" MODIFIED="1782944604959" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scratch" />
