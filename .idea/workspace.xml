@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add &quot;Kind&quot; column and functionality to distinguish Spot vs. Perp orders in Hyperliquid open orders panel: Includes UI updates, order kind detection, and handling improvements">
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add price history fetching to Schwab provider and `market-fetch-all` command to main script">
+      <change beforePath="$PROJECT_DIR$/app/services/schwab.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/schwab.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -167,7 +165,7 @@
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
       <workItem from="1782492563563" duration="40000000" />
-      <workItem from="1782771585947" duration="24700000" />
+      <workItem from="1782771585947" duration="27055000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -489,15 +487,29 @@
       <option name="project" value="LOCAL" />
       <updated>1782885029465</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="Add market data providers for Schwab and Databento: Includes quote and OHLCV fetching, error handling, resampling support, and parquet storage integration">
+      <option name="closed" value="true" />
+      <created>1782939881572</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1782939881572</updated>
+    </task>
+    <task id="LOCAL-00042" summary="Add price history fetching to Schwab provider and `market-fetch-all` command to main script">
+      <option name="closed" value="true" />
+      <created>1782943130426</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1782943130426</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Make Ducket Bucket sections resizable" />
-    <MESSAGE value="Add Schwab and Hyperliquid Duckets tabs" />
     <MESSAGE value="fixed _build_layout() inner method bug!" />
     <MESSAGE value="Add Schwab order and option chain API methods" />
     <MESSAGE value="import changes to schwab.py and adding schwab, hyperliquid, and databento API docs in a folder called 'docs'" />
@@ -521,7 +533,9 @@
     <MESSAGE value="Resolve unresolved reference for `normalize_hyperliquid_limit_price` in `ducket_bucket.py`" />
     <MESSAGE value="Add editing functionality for Hyperliquid open orders: UI enhancements, order modification handling, and display improvements for coin data." />
     <MESSAGE value="Add &quot;Kind&quot; column and functionality to distinguish Spot vs. Perp orders in Hyperliquid open orders panel: Includes UI updates, order kind detection, and handling improvements" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add &quot;Kind&quot; column and functionality to distinguish Spot vs. Perp orders in Hyperliquid open orders panel: Includes UI updates, order kind detection, and handling improvements" />
+    <MESSAGE value="Add market data providers for Schwab and Databento: Includes quote and OHLCV fetching, error handling, resampling support, and parquet storage integration" />
+    <MESSAGE value="Add price history fetching to Schwab provider and `market-fetch-all` command to main script" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add price history fetching to Schwab provider and `market-fetch-all` command to main script" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
