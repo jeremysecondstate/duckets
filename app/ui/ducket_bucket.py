@@ -1133,11 +1133,12 @@ class HyperliquidDucketsTab(DucketsTab):
 
         self.hyperliquid_open_orders_table = ttk.Treeview(
             panel,
-            columns=("account", "oid", "coin", "side", "size", "price", "type", "reduce_only"),
+            columns=("account", "kind", "oid", "coin", "side", "size", "price", "type", "reduce_only"),
             show="headings",
             height=10,
         )
         self._setup_column(self.hyperliquid_open_orders_table, "account", "Account", 90)
+        self._setup_column(self.hyperliquid_open_orders_table, "kind", "Kind", 70)
         self._setup_column(self.hyperliquid_open_orders_table, "oid", "Order ID", 110)
         self._setup_column(self.hyperliquid_open_orders_table, "coin", "Coin", 90)
         self._setup_column(self.hyperliquid_open_orders_table, "side", "Side", 80)
@@ -1339,6 +1340,7 @@ class HyperliquidDucketsTab(DucketsTab):
 
             for order in orders:
                 lookup_key = _hyperliquid_open_order_lookup_key(order)
+                self.hyperliquid_open_order_by_lookup_key[lookup_key] = order
                 raw_coin = str(order.get("coin") or "")
                 display_coin = _hyperliquid_display_open_order_coin(raw_coin, spot_meta_and_asset_ctxs)
 
@@ -1348,6 +1350,7 @@ class HyperliquidDucketsTab(DucketsTab):
                     iid=lookup_key,
                     values=(
                         order.get("accountLabel") or account_key.title(),
+                        _hyperliquid_order_kind(order),
                         order.get("oid") or "",
                         display_coin,
                         _hyperliquid_order_side(order),
@@ -1478,6 +1481,8 @@ class HyperliquidDucketsTab(DucketsTab):
         self._hyperliquid_action_not_wired("open TP/SL orders", "selected account")
 
     def _edit_selected_hyperliquid_open_order(self, _event: object | None = None) -> None:
+        self._use_selected_hyperliquid_order(_event)
+
         order = self._selected_hyperliquid_order()
         if order is None:
             messagebox.showinfo("Edit Hyperliquid order", "Select an open order first.")
@@ -1587,19 +1592,22 @@ class HyperliquidDucketsTab(DucketsTab):
 
         lookup_key = str(selected[0])
         values = self.hyperliquid_open_orders_table.item(lookup_key, "values")
-        if len(values) < 3:
+        if len(values) < 4:
             return
 
         self.selected_hyperliquid_order_key = lookup_key
 
-        account = str(values[0])
-        order_id = str(values[1])
-        display_coin = str(values[2])
+        kind = str(values[1])
+        order_id = str(values[2])
+        display_coin = str(values[3])
 
         self.spot_cancel_order_id.set(order_id)
         self.perp_cancel_order_id.set(order_id)
-        self.spot_market.set(display_coin)
-        self.perp_coin.set(display_coin)
+
+        if kind.upper() == "SPOT":
+            self.spot_market.set(display_coin)
+        else:
+            self.perp_coin.set(display_coin)
 
     def _selected_hyperliquid_order(self) -> dict[str, object] | None:
         if not self.selected_hyperliquid_order_key:
@@ -1621,6 +1629,15 @@ def _hyperliquid_display_open_order_coin(raw_coin: str, spot_meta_and_asset_ctxs
 
     market = _spot_market_label_from_meta(market_index, spot_meta_and_asset_ctxs)
     return market or coin
+
+
+def _hyperliquid_order_kind(order: dict[str, object]) -> str:
+    coin = str(order.get("coin") or "").strip()
+
+    if coin.startswith("@") or "/" in coin:
+        return "SPOT"
+
+    return "PERP"
 
 
 def _int_from_at_market(value: str) -> int | None:
@@ -1844,7 +1861,7 @@ def _hyperliquid_order_submitted_message(
             f"Limit price: {format_hyperliquid_limit_price(ticket.limit_price)}",
             f"Estimated notional: ${ticket.notional:,.2f}",
             "",
-            f"Response: {result}",
+            "",
         ]
     )
 

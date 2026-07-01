@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add Hyperliquid spot sizing helpers, account snapshot support, and size calculation utilities">
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add editing functionality for Hyperliquid open orders: UI enhancements, order modification handling, and display improvements for coin data.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/ui/ducket_bucket.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/ui/ducket_bucket.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -13,7 +14,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="29" />
+    <option name="cachedIndexableFilesCount" value="30" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="FileTemplateManagerImpl">
@@ -44,61 +45,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.3711308926572623" />
-      <entry key="MS500" value="1.8201729111967264" />
-      <entry key="S2" value="1.951648035261894" />
-      <entry key="S5" value="1.9803711942752549" />
-      <entry key="S10" value="1.990136957332295" />
-      <entry key="S30" value="1.9967014506461345" />
-      <entry key="S60" value="1.9983493630218505" />
-      <entry key="M2" value="1.9991743406542475" />
-      <entry key="M5" value="1.9996696544200538" />
-      <entry key="M10" value="1.999834813566748" />
-      <entry key="M15" value="1.999889872679103" />
-      <entry key="M30" value="1.9999449357774501" />
-      <entry key="H1" value="2.0000396003905054" />
-      <entry key="H2" value="2.036557347819051" />
-      <entry key="H4" value="3.0930533871361225" />
-      <entry key="D1" value="39.96189635957946" />
-      <entry key="W1" value="106.27211113508673" />
+      <entry key="MS100" value="7.015811430307821E-7" />
+      <entry key="MS500" value="0.09573465353568181" />
+      <entry key="S2" value="2.0532766478455304" />
+      <entry key="S5" value="4.567136070359652" />
+      <entry key="S10" value="6.209818810380841" />
+      <entry key="S30" value="7.864630995730706" />
+      <entry key="S60" value="8.398390643436638" />
+      <entry key="M2" value="8.689910596761335" />
+      <entry key="M5" value="8.89484380616798" />
+      <entry key="M10" value="9.142505976259054" />
+      <entry key="M15" value="9.397122823625017" />
+      <entry key="M30" value="9.916380192110068" />
+      <entry key="H1" value="10.358820379831608" />
+      <entry key="H2" value="10.679881517180384" />
+      <entry key="H4" value="11.81096023980804" />
+      <entry key="D1" value="48.335772811315024" />
+      <entry key="W1" value="115.032738320272" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="0.0" />
-      <entry key="S5" value="0.0" />
-      <entry key="S10" value="0.0" />
-      <entry key="S30" value="0.0" />
-      <entry key="S60" value="0.0" />
-      <entry key="M2" value="7.73497486085091E-182" />
-      <entry key="M5" value="3.5923906934378264E-73" />
-      <entry key="M10" value="5.9936555568683005E-37" />
-      <entry key="M15" value="7.108770945388145E-25" />
-      <entry key="M30" value="8.431352797492696E-13" />
-      <entry key="H1" value="9.182862999802798E-7" />
-      <entry key="H2" value="9.681886885337171E-4" />
-      <entry key="H4" value="0.035322751061164344" />
-      <entry key="D1" value="1.6326510290599665" />
-      <entry key="W1" value="4.210865264925533" />
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0" />
+      <entry key="S2" value="1.0" />
+      <entry key="S5" value="1.0" />
+      <entry key="S10" value="1.0" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0" />
+      <entry key="M2" value="1.0" />
+      <entry key="M5" value="1.0" />
+      <entry key="M10" value="1.0" />
+      <entry key="M15" value="1.0" />
+      <entry key="M30" value="1.0000000000003952" />
+      <entry key="H1" value="1.000000628773498" />
+      <entry key="H2" value="1.0008011578014393" />
+      <entry key="H4" value="1.0321316887511152" />
+      <entry key="D1" value="2.607088789206969" />
+      <entry key="W1" value="5.201383009663424" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.3711316835580133" />
-      <entry key="MS500" value="0.8803767795729855" />
-      <entry key="S2" value="1.4469911143125351" />
-      <entry key="S5" value="1.7353981201196302" />
-      <entry key="S10" value="1.8590598111256427" />
-      <entry key="S30" value="1.9509475791252462" />
-      <entry key="S60" value="1.9752045869312644" />
-      <entry key="M2" value="1.987534206244415" />
-      <entry key="M5" value="1.99499723982064" />
-      <entry key="M10" value="1.997495870940737" />
-      <entry key="M15" value="1.998329969112064" />
-      <entry key="M30" value="1.9991646795949098" />
-      <entry key="H1" value="1.9996503136573163" />
-      <entry key="H2" value="2.0373300526421847" />
-      <entry key="H4" value="3.1282720092646494" />
-      <entry key="D1" value="41.5944786802311" />
-      <entry key="W1" value="110.48295518026578" />
+      <entry key="MS100" value="0.004072797991556494" />
+      <entry key="MS500" value="0.42317610076335654" />
+      <entry key="S2" value="2.7852389560566033" />
+      <entry key="S5" value="5.4414909347557385" />
+      <entry key="S10" value="7.142464953596385" />
+      <entry key="S30" value="8.840818975890542" />
+      <entry key="S60" value="9.386274518433032" />
+      <entry key="M2" value="9.683795649843038" />
+      <entry key="M5" value="9.892334022327807" />
+      <entry key="M10" value="10.141032417844949" />
+      <entry key="M15" value="10.395957715665524" />
+      <entry key="M30" value="10.915602991706555" />
+      <entry key="H1" value="11.358348067799186" />
+      <entry key="H2" value="11.680418019815074" />
+      <entry key="H4" value="12.842945754381756" />
+      <entry key="D1" value="50.942785391900934" />
+      <entry key="W1" value="120.23409893281915" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -162,7 +163,7 @@
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
       <workItem from="1782492563563" duration="40000000" />
-      <workItem from="1782771585947" duration="9946000" />
+      <workItem from="1782771585947" duration="18649000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -452,16 +453,37 @@
       <option name="project" value="LOCAL" />
       <updated>1782804135942</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="Add Hyperliquid trading integration: Order ticket classes, execution adapters, and support for spot and perp order submission, cancellation, and open orders loading. normalize_hyperliquid_limit_price unresolved reference in ducket_bucket.py">
+      <option name="closed" value="true" />
+      <created>1782807425618</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1782807425618</updated>
+    </task>
+    <task id="LOCAL-00038" summary="Resolve unresolved reference for `normalize_hyperliquid_limit_price` in `ducket_bucket.py`">
+      <option name="closed" value="true" />
+      <created>1782808573534</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1782808573534</updated>
+    </task>
+    <task id="LOCAL-00039" summary="Add editing functionality for Hyperliquid open orders: UI enhancements, order modification handling, and display improvements for coin data.">
+      <option name="closed" value="true" />
+      <created>1782876393826</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1782876393826</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add Ducket Bucket desktop UI" />
-    <MESSAGE value="removed Callable import" />
-    <MESSAGE value="post info for hyperliquid.py modified!" />
     <MESSAGE value="Add dark Ducket Bucket theme" />
     <MESSAGE value="Make Ducket Bucket sections resizable" />
     <MESSAGE value="Add Schwab and Hyperliquid Duckets tabs" />
@@ -484,7 +506,10 @@
     <MESSAGE value="Refactor Ducket Bucket UI: Replace `pack` with `PanedWindow` for panel layout, add option moneyness tagging and row styling logic" />
     <MESSAGE value="Add Hyperliquid-specific Duckets tab with spot and perp ticket forms, order actions, and open orders panel integration" />
     <MESSAGE value="Add Hyperliquid spot sizing helpers, account snapshot support, and size calculation utilities" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add Hyperliquid spot sizing helpers, account snapshot support, and size calculation utilities" />
+    <MESSAGE value="Add Hyperliquid trading integration: Order ticket classes, execution adapters, and support for spot and perp order submission, cancellation, and open orders loading. normalize_hyperliquid_limit_price unresolved reference in ducket_bucket.py" />
+    <MESSAGE value="Resolve unresolved reference for `normalize_hyperliquid_limit_price` in `ducket_bucket.py`" />
+    <MESSAGE value="Add editing functionality for Hyperliquid open orders: UI enhancements, order modification handling, and display improvements for coin data." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add editing functionality for Hyperliquid open orders: UI enhancements, order modification handling, and display improvements for coin data." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$main.coverage" NAME="main Coverage Results" MODIFIED="1782624042772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
