@@ -14,9 +14,19 @@ class SchwabPriceHistorySpec:
 
 
 @dataclass(frozen=True)
-class DatabentoWindowSpec:
+class DatabentoNativeBarSpec:
     key: str
-    lookback_minutes: int
+    schema: str
+    frequency: str
+
+
+@dataclass(frozen=True)
+class DatabentoDerivedBarSpec:
+    key: str
+    source_schema: str
+    source_frequency: str
+    output_frequency: str
+    aggregation_method: str
 
 
 def schwab_price_history_specs() -> tuple[SchwabPriceHistorySpec, ...]:
@@ -73,16 +83,27 @@ def schwab_price_history_specs() -> tuple[SchwabPriceHistorySpec, ...]:
     return tuple(specs)
 
 
-def databento_window_specs() -> tuple[DatabentoWindowSpec, ...]:
+def databento_native_bar_specs() -> tuple[DatabentoNativeBarSpec, ...]:
     return (
-        DatabentoWindowSpec("1d", 24 * 60),
-        DatabentoWindowSpec("5d", 5 * 24 * 60),
-        DatabentoWindowSpec("10d", 10 * 24 * 60),
-        DatabentoWindowSpec("30d", 30 * 24 * 60),
-        DatabentoWindowSpec("90d", 90 * 24 * 60),
-        DatabentoWindowSpec("1y", 366 * 24 * 60),
+        DatabentoNativeBarSpec("native_1s", "ohlcv-1s", "1s"),
+        DatabentoNativeBarSpec("native_1m", "ohlcv-1m", "1m"),
+        DatabentoNativeBarSpec("native_1h", "ohlcv-1h", "1h"),
+        DatabentoNativeBarSpec("native_1d", "ohlcv-1d", "1d"),
     )
 
 
-def databento_resample_frequencies() -> tuple[str, ...]:
-    return "1m", "5m", "10m", "15m", "30m", "1h", "1d"
+def databento_derived_bar_specs() -> tuple[DatabentoDerivedBarSpec, ...]:
+    return (
+        DatabentoDerivedBarSpec("derived_5s", "ohlcv-1s", "1s", "5s", "resampled_from_1s"),
+        DatabentoDerivedBarSpec("derived_10s", "ohlcv-1s", "1s", "10s", "resampled_from_1s"),
+        DatabentoDerivedBarSpec("derived_15s", "ohlcv-1s", "1s", "15s", "resampled_from_1s"),
+        DatabentoDerivedBarSpec("derived_30s", "ohlcv-1s", "1s", "30s", "resampled_from_1s"),
+        DatabentoDerivedBarSpec("derived_5m", "ohlcv-1m", "1m", "5m", "resampled_from_1m"),
+        DatabentoDerivedBarSpec("derived_10m", "ohlcv-1m", "1m", "10m", "resampled_from_1m"),
+        DatabentoDerivedBarSpec("derived_15m", "ohlcv-1m", "1m", "15m", "resampled_from_1m"),
+        DatabentoDerivedBarSpec("derived_30m", "ohlcv-1m", "1m", "30m", "resampled_from_1m"),
+        DatabentoDerivedBarSpec("derived_2h", "ohlcv-1h", "1h", "2h", "resampled_from_1h"),
+        DatabentoDerivedBarSpec("derived_4h", "ohlcv-1h", "1h", "4h", "resampled_from_1h"),
+        DatabentoDerivedBarSpec("derived_1w", "ohlcv-1d", "1d", "1w", "resampled_from_1d"),
+        DatabentoDerivedBarSpec("derived_1mo", "ohlcv-1d", "1d", "1mo", "resampled_from_1d"),
+    )
