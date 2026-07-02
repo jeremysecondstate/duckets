@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add new Databento environment variables for fetch cost limits, range settings, and native schemas">
-      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/market_parquet_store.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/market_parquet_store.py" afterDir="false" />
+    <list default="true" id="4cf69128-21bf-4b00-8506-855ec4efba6e" name="Changes" comment="Add `duckets.egg-info` metadata, update default OHLCV directory, expand Databento schemas, and add analysis error files">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -168,7 +167,7 @@
       <workItem from="1782170829083" duration="14954000" />
       <workItem from="1782368167448" duration="10978000" />
       <workItem from="1782492563563" duration="40000000" />
-      <workItem from="1782771585947" duration="29607000" />
+      <workItem from="1782771585947" duration="31806000" />
     </task>
     <task id="LOCAL-00001" summary="Initial project structure">
       <option name="closed" value="true" />
@@ -546,14 +545,21 @@
       <option name="project" value="LOCAL" />
       <updated>1782945855196</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="Add `duckets.egg-info` metadata, update default OHLCV directory, expand Databento schemas, and add analysis error files">
+      <option name="closed" value="true" />
+      <created>1782947071219</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1782947071219</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Use Schwab ticket field mappings" />
     <MESSAGE value="removed " />
     <MESSAGE value="Remove redundant Schwab ticket field initializations" />
     <MESSAGE value="Show expanded Schwab ticket fields: Redesign and expand Schwab ticket panels with improved layout and additional fields" />
@@ -578,7 +584,8 @@
     <MESSAGE value="Remove scratch Databento parquet file reader script" />
     <MESSAGE value="Refactor Databento market data end time handling: Introduce `_default_databento_end_time` helper for environment-based default values and consistency." />
     <MESSAGE value="Add new Databento environment variables for fetch cost limits, range settings, and native schemas" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add new Databento environment variables for fetch cost limits, range settings, and native schemas" />
+    <MESSAGE value="Add `duckets.egg-info` metadata, update default OHLCV directory, expand Databento schemas, and add analysis error files" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add `duckets.egg-info` metadata, update default OHLCV directory, expand Databento schemas, and add analysis error files" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/duckets$inspect_parquets.coverage" NAME="inspect_parquets Coverage Results" MODIFIED="1782946781052" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scratch" />
